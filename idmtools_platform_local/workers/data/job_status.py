@@ -1,7 +1,7 @@
 from sqlalchemy import  Enum, Column, String
 from sqlalchemy.dialects.postgresql import JSON
-from idmtools_local.workers.data import Base
-from idmtools_local.status import Status
+from idmtools_platform_local.workers.data import Base
+from idmtools_platform_local.status import Status
 
 
 class JobStatus(Base):

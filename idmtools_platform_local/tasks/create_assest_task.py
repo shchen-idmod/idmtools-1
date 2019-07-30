@@ -2,7 +2,7 @@ import base64
 import logging
 import os
 from dramatiq import GenericActor
-from idmtools_local.config import DATA_PATH
+from idmtools_platform_local.config import DATA_PATH
 
 logger = logging.getLogger(__name__)
 

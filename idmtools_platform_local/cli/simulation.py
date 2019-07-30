@@ -1,11 +1,11 @@
 from typing import Optional, Tuple, List, Dict, Any
 import click
 from tabulate import tabulate
-from idmtools_local.cli.base import cli
-from idmtools_local.cli.utils import colorize_status, tags_help, urlize_data_path, show_error
-from idmtools_local.client.simulations_client import SimulationsClient
-from idmtools_local.config import API_PATH
-from idmtools_local.status import Status
+from idmtools_platform_local.cli.base import cli
+from idmtools_platform_local.cli.utils import colorize_status, tags_help, urlize_data_path, show_error
+from idmtools_platform_local.client.simulations_client import SimulationsClient
+from idmtools_platform_local.config import API_PATH
+from idmtools_platform_local.status import Status
 
 SIMULATIONS_URL = f'{API_PATH}/simulations'
 

@@ -5,8 +5,8 @@ import shlex
 import sys
 import subprocess
 from dramatiq import GenericActor
-from idmtools_local.config import DATA_PATH
-from idmtools_local.status import Status
+from idmtools_platform_local.config import DATA_PATH
+from idmtools_platform_local.status import Status
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +21,9 @@ class RunTask(GenericActor):
 
     def perform(self, command: str, experiment_uuid: str, simulation_uuid: str):
         # we only want to import this here so that clients don't need postgres/sqlalchemy packages
-        from idmtools_local.workers.utils import create_or_update_status
-        from idmtools_local.workers.data.job_status import JobStatus
-        from idmtools_local.workers.database import get_session
+        from idmtools_platform_local.workers.utils import create_or_update_status
+        from idmtools_platform_local.workers.data.job_status import JobStatus
+        from idmtools_platform_local.workers.database import get_session
 
         # Check if the job has been canceled
         current_job: JobStatus = get_session().query(JobStatus). \

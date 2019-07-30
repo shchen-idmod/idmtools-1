@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from idmtools_local.config import SQLALCHEMY_ECHO, SQLALCHEMY_DATABASE_URI
+from idmtools_platform_local.config import SQLALCHEMY_ECHO, SQLALCHEMY_DATABASE_URI
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def get_session() -> Session:
             logger.debug('Connecting to postgres with URI %s', SQLALCHEMY_DATABASE_URI)
         engine = get_db()
         session_factory = sessionmaker(bind=engine)
-        from idmtools_local.workers.data.job_status import Base
+        from idmtools_platform_local.workers.data.job_status import Base
         logger.info("Creating database schema")
         Base.metadata.create_all(engine)
 

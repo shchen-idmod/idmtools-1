@@ -1,10 +1,10 @@
 from typing import Optional, Tuple, List, Any, Dict
 import click
 from tabulate import tabulate
-from idmtools_local.cli.base import cli
-from idmtools_local.cli.utils import parent_status_to_progress, urlize_data_path, tags_help, show_error
-from idmtools_local.client.experiments_client import ExperimentsClient
-from idmtools_local.config import API_PATH
+from idmtools_platform_local.cli.base import cli
+from idmtools_platform_local.cli.utils import parent_status_to_progress, urlize_data_path, tags_help, show_error
+from idmtools_platform_local.client.experiments_client import ExperimentsClient
+from idmtools_platform_local.config import API_PATH
 
 
 EXPERIMENTS_URL = f'{API_PATH}/experiments'

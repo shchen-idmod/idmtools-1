@@ -1,6 +1,6 @@
 import requests
 
-from idmtools_local.config import API_PATH
+from idmtools_platform_local.config import API_PATH
 
 
 class BaseClient:

@@ -6,10 +6,10 @@ import pandas as pd
 from flask_restful import Resource, reqparse, abort
 from sqlalchemy import String, func, or_
 
-from idmtools_local.config import DATA_PATH
-from idmtools_local.workers.data.job_status import JobStatus
-from idmtools_local.workers.database import get_session
-from idmtools_local.workers.ui.controllers.utils import validate_tags
+from idmtools_platform_local.config import DATA_PATH
+from idmtools_platform_local.workers.data.job_status import JobStatus
+from idmtools_platform_local.workers.database import get_session
+from idmtools_platform_local.workers.ui.controllers.utils import validate_tags
 
 logger = logging.getLogger(__name__)
 

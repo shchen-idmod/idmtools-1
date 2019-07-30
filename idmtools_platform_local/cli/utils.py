@@ -3,8 +3,8 @@ from math import floor
 from typing import Dict
 import requests
 from colorama import  Fore, Back
-from idmtools_local.config import DATA_PATH
-from idmtools_local.status import Status
+from idmtools_platform_local.config import DATA_PATH
+from idmtools_platform_local.status import Status
 
 status_text_color_map = dict(failed=Fore.RED, in_progress=Fore.YELLOW, done=Fore.GREEN, canceled=Fore.CYAN)
 status_progress_color_map = dict(failed=Back.RED, in_progress=Back.YELLOW, done=Back.GREEN, canceled=Fore.CYAN)
