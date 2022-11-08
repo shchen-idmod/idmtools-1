@@ -1,4 +1,9 @@
 name: "build_rocky_image"
+#on:
+#  push:
+#    paths:
+#      - 'examples/singularity/rocky/**'
+#      - '**.*'
 on:
   workflow_dispatch:
 
