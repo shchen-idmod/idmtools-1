@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-pip_stage:
+  run-pip_stage-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
