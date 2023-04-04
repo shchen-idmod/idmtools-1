@@ -10,6 +10,7 @@ on:
       - 'release**'
     paths:
       - 'idmtools_platform_local/**'
+      - 'idmtools_webui/**'
 
 jobs:
   deploy-local-staging:
