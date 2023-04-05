@@ -1,218 +1,121 @@
+# Packages Status
+![Staging: idmtools-core](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-core/badge.svg?branch=dev)
+![Staging: idmtools-cli](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-cli/badge.svg?branch=dev)
+![Staging: idmtools-models](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-models/badge.svg?branch=dev)
+![Staging: idmtools-platform-comps](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-platform-comps/badge.svg?branch=dev)
 ![Staging: idmtools-platform-local](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-platform-local/badge.svg?branch=dev)
+![Staging: idmtools-platform-slurm](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-platform-slurm/badge.svg?branch=dev)
+![Staging: idmtools-test](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Staging:%20idmtools-test/badge.svg?branch=dev)
 
-# idmtools-platform-local
+# Other status
+![Dev: Rebuild documentation](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Rebuild%20documentation/badge.svg?branch=dev)
+![Lint](https://github.com/InstituteforDiseaseModeling/idmtools/workflows/Lint/badge.svg?branch=dev)
 
-The IDM Tool Local Runner allows execution of tasks in a local docker container and provides a platform that is
-somewhat similar to COMPS, though much more limited
+# IDM Modeling Tools
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-  - [Installing](#installing)
-  - [Module Organization](#module-organization)
-- [Running the Local Runner](#running-the-local-runner)
-- [Using the UI](#using-the-ui)
-- [Using the local website](#using-the-local-website)
-- [Development Tips](#development-tips)
-  - [Understanding the components](#understanding-the-components)
-  - [Debugging the workers](#debugging-the-workers)
-    - [Debug configuration](#debug-configuration)
-      - [Script Path](#script-path)
-      - [Script Arguments](#script-arguments)
-        - [Script Environment](#script-environment)
-  - [Troubleshooting Tests](#troubleshooting-tests)
+- [User Installation](#user-installation)
+  - [Recommended install](#recommended-install)
+  - [Advanced Install](#advanced-install)
+  - [Installing Development/Early Release Versions](#installing-developmentearly-release-versions)
+    - [PyPI](#pypi)
+  - [Pre-requisites](#pre-requisites)
+- [Reporting issues](#reporting-issues)
+- [Requesting a feature](#requesting-a-feature)
+- [Development Documentation](#development-documentation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## Installing
+# User Installation
 
+Documentation is located at https://docs.idmod.org/projects/idmtools/en/latest/. 
+
+To build the documentation locally, do the following:
+
+1. Create and activate a venv.
+2. Navigate to the root directory of the repo and enter the following:
+
+    ```
+    pip install -r dev_scripts/package_requirements.txt
+    pip install -r docs/requirements.txt
+    python dev_scripts/bootstrap.py
+    cd docs
+    make html
+    ```
+3. (Optional) To automatically serve the built docs locally in your browser, enter the following from
+   the root directory:
+
+    ```
+    python dev_scripts/serve_docs.py
+    ```
+
+## Recommended install
+
+The recommended install is to use
 ```bash
-pip install idmtools-platform-local --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools[full] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
 ```
+This will install the core tools, the cli, the comps and local platforms, support for EMOD models, and python models
 
-## Module Organization
-
-    ├── ./docker_scripts          <- Script for use inside of docker container only. Mainly S6 service/user scripts
-    ├── idmtools_platform_local   <- Base of the module contents
-    │   ├── cli                   <- Contains the CLI interface for the idmtools_local.
-    │   ├── client                <- API Client
-    │   ├── infrastructure        <- Docker service related items
-    │   ├── internals             <- Server related components
-    │   │   ├── data              <- Data definition for idmtool_local
-    │   │   ├── tasks             <- Our Queue Worker Tasks
-    │   │   ├── ui                <- Web UI for idmtool_local
-    │   │   └── workers           <- Dramatiq worker config and utils
-    ├── docker-compose.yml        <- Docker-compose file for the local service
-    ├── Dockerfile                <- Dockfile for both Development and Production
-    ├── requirements.txt          <- Python requirements for fopr the idmtools_local_runner. This ONLY specifies client requirements
-    ├── setup.py                  <- Python setup file with dependencies
-    └── README.md                 <- The top-level README for developers using this project.
-
-# Running the Local Runner
-
-The local runner will start on it's own using when you select it as the platform. For example, from your code you can
- do the following with this example idmtools.ini file
- ```ini
-[Local_Staging]
-type = Local
- ```
- In your code, you could then get then use as would any other platform
-```python
-from idmtools.core.platform_factory import Platform
-from idmtools.managers.experiment_manager import ExperimentManager
-
-platform = Platform('Local')
-...
-em = ExperimentManager(experiment=experiment, platform=platform)
-em.run()
-em.wait_till_done()
-
-```
-
-You can manage the Local platform using cli commands
-* `idmtools local down`    - Shutdown the local platform. You can also add the `--delete-data` flag to delete the local data as well
-* `idmtools local restart` - Restart the local platform
-* `idmtools local start`   - Start the local platform
-* `idmtools local status`  - Check local platform status
-
-The workers service contains the IDMTools workers that actually execut the tasks as well as containing a simplistic UI
-running at http://localhost:5000
-
-# Using the UI
-
-The Web UI is available at http://localhost:5000/data. Currently it only supports displaying the data directories from
-experiments. It is best used in conjunction with the CLI status commands
-
-# Using the local website
-
-
-To use the website, please use the following steps:
-
-1. Run `idmtools local start` to start the local platfrom  
-2. Run `pymake start-webui` to start the webserver
-3. If a browser has not started, please open a browser and visit "http://localhost:3000" to see the website
-
-Note: the above steps may change after the website is included as part of docker container
-
-# Development Tips
-
-There is a Makefile file available for most common development tasks. Here is a list of commands
+If you do not need the local platform, you can use the following command
 ```bash
-clean       -   Clean up temproary files
-lint        -   Lint package and tests
-test        -   Run Unit tests
-test-all    -   Run all tests including integration and docker test
-docker-cleanup - Manually cleanup
-docker - Build docker image using local pypi server for packaging
-
-coverage    -   Run tests and generate coverage report that is shown in browser
+pip install idmtools[idm] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
 ```
-On Windows, you can use `pymake` instead of `make`
+This will install the core tools, the cli, the comps, support for EMOD models, and python models
 
-## Understanding the components
-
-Local platform is built from two fundamental high-level areas, client-server. You can see from the project layout above 
-that all server code is located under internals and client code is at the top-level of the package.
-
-The client side code has two main areas of concern. The first is allocation and orchestration of the Local Platform 
-services. This is done mostly through the infrastructure module. The second concern is communication with the API 
-service which is done through the client module. 
-
-Within the server, there are two distinct areas. The first area is dramatiq related workers. Dramatiq workers are 
-mostly defined by the tasks, workers, and also data folder from the internals module. The second area is UI which is 
-under the UI module of internals. UI also uses the internals data module.
-
-Within a running instance of a local platform container the works between the two areas is divided into 3 or 4 processes 
-depending on GPU availability. On the worker side we have
-- Provisioning workers
-- CPU Workers
-- GPU workers if docker support nvidia containers
-
-These workers all use the same code but have different runtime parameters defined in the run scripts within
- `idmtools_platform_local/docker_scripts/services`
-
-The UI is the other portion. In a running container, it is ran using the usgi manager with nginx.
-
-Including in this are two additional containers
-* Redis
-* Postgres
-
-The local platform manages these containers for the end user.
-
-## Debugging the workers
-
-Currently, workers can only run on Linux. To debug from windows you will need to debug through a docker container. 
-Sometimes logging can be just as effective as debugging in this situations.
-
-To debug the workers you have to consider a few things first. First, the debug configuration will depend on which 
-tasks you wish to debug. You will need to gather all the queues of the target task and any tasks sooner in the 
-workflow. For example, RunTask is only triggered usually after CreateExperiment and CreateSimulation tasks.
-
-
-### Debug configuration
-Before debugging you will need to ensure the redis and postgres containers are running. You can do this by running 
-`idmtools local start` and then `docker stop idmtools_workers`
-
-You will then want to run with the following options
-
-#### Script Path
-path to dramatiq. This should be in the bin directory of your virtual env. On Windows, you have to debug 
-through the docker and therefore will find dramatiq in /usr/local/bin
-
-#### Script Arguments 
+If you are Python 3.6, you will also need to run
+```bash
+pip install dataclasses
 ```
---verbose --processes 1 --threads 1 idmtools_platform_local.internals.workers.run_broker:redis_broker idmtools_platform_local.internals.workers.run --queues cpu --threads 1
-```
-    
-If you need to debug more than one queue, use additional `--queues` options
+## Advanced Install
+You can also install just the individual packages to create minimal environments
 
-##### Script Environment
-You will most likely need the following environment variables. Change accordingly
-* `DATA_PATH=/home/clinton/development/work/idmtools/idmtools_local_runner/test_data`
-* `SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://idmtools:idmtools@localhost:5432/idmtools`
-* `SQLALCHEMY_ECHO=1`
-    
-## Troubleshooting Tests
+- `pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple` - Core package
+- `pip install idmtools-cli --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple` - Adds the idmtools cli commands
+- `pip install idmtools-platform-comps --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple` - Support for COMPS
+- `pip install idmtools-platform-local --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple` - Support for Local Platform
+- `pip install idmtools-models --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple` - Python and generic models
 
-* By setting the environment variable `NO_TEST_WORKER_CLEANUP=1`, worker cleanup will be disabled on test. This is 
-useful when a specific script/job is failing and you want to troubleshoot the output of the task(StdOut.txt)
-* You can attempt to run simple jobs like python simulations by following these steps.
-  1. Grab the command from the idmtools_workers logs
-  ```
-  [2019-11-12 07:22:19,253] [PID 341] [Thread-5] [idmtools_platform_local.internals.tasks.general_task] [INFO] Executing python ./Assets/model1.py config.json from working directory /data/8ZQTUTAC/T8PBPPHP
-  ```
-  1. With a running set of the local platform(if it is not running use `idmtools local start`) run the command
-      ```bash
-     docker exec -it idmtools_workers bash
-     ```
-  1. From within the bash shell run
-     ```bash
-     su - idmtools
-     ```
-  1. cd to the working directory. In this case, `/data/8ZQTUTAC/T8PBPPHP`
-  1. Run the command
-     ```
-     python ./Assets/model1.py config.json
-     ```
-* The Local platform requires you to be able to run docker without needing sudo access. You can test this by running
-`docker ps` and see if the command succeeds for you. Usually when you do not have access to docker as the current user
-then you will receive errors like 
+## Installing Development/Early Release Versions
 
- ```bash
- Creating tar archive
-removing 'idmtools-0.2.0+nightly' (and everything under it)
-twine upload --verbose --repository-url http://localhost:7171 -u admin -p admin dist/*
-Uploading distributions to http://localhost:7171
-Uploading idmtools-0.2.0+nightly.tar.gz
- 0%|                                                                                     | 0.00/48.4k [00:00<?, ?B/s]
-Traceback (most recent call last):
- File "/software/anaconda3/lib/python3.7/site-packages/urllib3/connection.py", line 159, in _new_conn
-   (self._dns_host, self.port), self.timeout, **extra_kw)
- File "/software/anaconda3/lib/python3.7/site-packages/urllib3/util/connection.py", line 80, in create_connection
-   raise err
- File "/software/anaconda3/lib/python3.7/site-packages/urllib3/util/connection.py", line 70, in create_connection
-   sock.connect(sa)
-ConnectionRefusedError: [Errno 111] Connection refused
- ```
-  
+Development versions are available through both IDM's pypi registry and through Github.
+
+### PyPI
+
+If you have your authentication defined in your pip.conf or pip.ini file, you can use the following commands to install from staging
+- `pip install idmtools --index-url=https://<USERNAME>:<PASSWORD>@packages.idmod.org/api/pypi/pypi-staging/simple` - Core package
+- `pip install idmtools-cli --index-url=https://<USERNAME>:<PASSWORD>@packages.idmod.org/api/pypi/pypi-staging/simple` - Adds the idmtools cli commands
+- `pip install idmtools-platform-comps --index-url=https://<USERNAME>:<PASSWORD>@packages.idmod.org/api/pypi/pypi-staging/simple` - Support for COMPS
+- `pip install idmtools-platform-local --index-url=https://<USERNAME>:<PASSWORD>@packages.idmod.org/api/pypi/pypi-staging/simple` - Support for Local Platform
+- `pip install idmtools-models --index-url=https://<USERNAME>:<PASSWORD>@packages.idmod.org/api/pypi/pypi-staging/simple` - Python and generic models
+
+## Pre-requisites
+- Python 3.6/3.7/3.8 x64
+- Docker(Required for the local platform)
+  On Windows, please use Docker Desktop 2.1.0.5 or 2.2.0.1
+
+# Reporting issues
+
+Include the following information in your post:
+
+-   Describe what you expected to happen.
+-   If possible, include a `minimal reproducible example` to help us
+    identify the issue. This also helps check that the issue is not with
+    your own code.
+-   Describe what actually happened. Include the full traceback if there
+    was an exception.
+
+You can report an issue directly on GitHub or by emailing [idmtools-issue@idmod.org](mailto:idmtools-issue@idmod.org). Please include steps to reproduce the issue
+
+# Requesting a feature 
+
+You can request a feature but opening a ticket on the repo or by emailing [idmtools-feature@idmod.org](mailto:idmtools-feature@idmod.org)
+
+# Development Documentation
+
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/InstituteforDiseaseModeling/idmtools)
+
+See [DEVELOPMENT_README.md](DEVELOPMENT_README.md)
