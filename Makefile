@@ -28,9 +28,6 @@ setup-dev: ## Setup packages in dev mode
 	python dev_scripts/bootstrap.py
 	$(MAKE) -C idmtools_platform_local docker
 
-setup-dev-no-docker: ## Setup packages in dev mode minus docker
-	python dev_scripts/bootstrap.py
-
 lint: ## check style with flake8
 	flake8
 
@@ -40,23 +37,14 @@ test: ## Run default set of tests which exclude comps and docker tests
 test-all: ## Run all our tests
 	$(MAKEALL) test-all
 
-test-all-no-ssmt: ## Run all our tests without ssmt tests
-	$(MAKEALL) test-all-no-ssmt
-
 test-failed: ## Run only previously failed tests
 	$(MAKEALL) test-failed
 
 test-no-long: ## Run any tests that takes less than 30s on average
 	$(MAKEALL) test-no-long
 
-test-comps: ## Run our comps tests
-	$(MAKEALL) test-comps
-
 test-docker: ## Run our docker tests
 	$(MAKEALL) test-docker
-
-test-python: ## Run our python tests
-	$(MAKEALL) test-python
 
 test-smoke: ## Run our smoke tests
 	$(MAKEALL) test-smoke
@@ -158,11 +146,7 @@ build-docs-server: build-docs ## builds docs and launch a webserver and watches 
 
 dev-watch: ## Run lint on any python code changes
 	$(PDS)run_commands_and_wait.py --command 'watchmedo shell-command --drop --wait --interval 10 --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --recursive --command="$(MAKE) --ignore-errors lint"' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_core' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_models' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_platform_comps' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_platform_local' \
-        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_cli'
+        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_platform_local'
 
 generate-stubs: ## Generate python interfaces. Useful to identify what the next version should be by comparing to previous runs
 	$(PDS)make_stub_files.py  -c dev_scripts/stub.cfg
