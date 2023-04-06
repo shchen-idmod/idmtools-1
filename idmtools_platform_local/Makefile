@@ -33,17 +33,13 @@ docker-cleanup: # Removes docker containers
 # should suffice for development
 # ensure pypi local is up
 docker: ## Build our docker image using the local pypi without versioning from artifactory
-	$(MAKE) -C ../idmtools_core dist
 	$(MAKE) dist
 	python build_docker_image.py
 
 docker-proper: ## This job gets version data from artifactory. Should be used for production releases
-	$(MAKE) -C ../idmtools_core dist
-	$(MAKE) dist
 	$(PY) build_docker_image.py --proper
 
 docker-only: ## Assumes you have made the local package already
-	$(MAKE) -C ../idmtools_core dist
 	python build_docker_image.py
 
 docker-only-proper: ## Assumes you have made the local package already without versioning from artifactory
