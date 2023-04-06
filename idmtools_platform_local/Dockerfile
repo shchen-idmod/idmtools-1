@@ -61,7 +61,7 @@ ENV PYTHONPATH=/app:${PYTHONPATH}
 #COPY .depends/* /tmp/
 RUN python -m pip install --upgrade pip
 RUN pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
-RUN bash -c "pip install /tmp/*.gz --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple"
+#RUN bash -c "pip install /tmp/*.gz --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple"
 # Install requirements first to reduce build cache misses
 ADD requirements.txt ui_requirements.txt workers_requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple && \
