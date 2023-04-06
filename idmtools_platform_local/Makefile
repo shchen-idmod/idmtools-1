@@ -47,7 +47,6 @@ docker-only: ## Assumes you have made the local package already
 	python build_docker_image.py
 
 docker-only-proper: ## Assumes you have made the local package already without versioning from artifactory
-	$(MAKE) -C ../idmtools_core dist
 	$(PY) build_docker_image.py --proper
 
 
