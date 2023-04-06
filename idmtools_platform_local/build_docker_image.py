@@ -54,9 +54,9 @@ os.makedirs(os.path.abspath('.depends'), exist_ok=True)
 for root, _dirs, files in os.walk(os.path.join(LOCAL_PACKAGE_DIR, '.depends')):
     for file in files:
         os.remove(os.path.join(root, file))
-for package in ['idmtools_core']:
-    for file in glob.glob(os.path.join(BASE_DIR, package, 'dist', '**.gz')):
-        shutil.copy(file, os.path.join(LOCAL_PACKAGE_DIR, '.depends', os.path.basename(file)))
+# for package in ['idmtools_core']:
+#     for file in glob.glob(os.path.join(BASE_DIR, package, 'dist', '**.gz')):
+#         shutil.copy(file, os.path.join(LOCAL_PACKAGE_DIR, '.depends', os.path.basename(file)))
 
 cmd = ['docker', 'build', '--network=host', '--tag',
        f'{REPO_KEY}.{BASE_REPO}/{IMAGE_NAME}:{version}', '.']
