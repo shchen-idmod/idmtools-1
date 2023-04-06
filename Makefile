@@ -1,55 +1,153 @@
-PACKAGE_NAME=idmtools_platform_local
-BASE_PIP_URL="packages.idmod.org/api/pypi/idm-pypi-"
-STAGING_PIP_URL?="https://$(BASE_PIP_URL)staging/simple"
-PRODUCTION_PIP_URL?="https://$(BASE_PIP_URL)production/simple"
+.PHONY: clean lint test coverage dist release-staging release-staging-release-commit release-staging-minor changelog start-allure docs
+MKDIR ?= mkdir
+MV ?= mv
+RM ?= rm
+IPY=python3 -c
+PY=python
+PDS=$(PY) dev_scripts/
+MAKEALL=$(PDS)run_pymake_on_all.py
+PDR=$(PDS)run.py
+CLDIR=$(PDS)clean_dir.py
+COVERAGE_PATH=tests/.coverage
 
-include $(abspath ../dev_scripts/package_general.mk)
+help:
+	help-from-makefile -f ./Makefile
 
+clean: stop-allure ## Clean most common outputs(Logs, Test Results, etc)
+	-$(MAKEALL) --parallel clean
+	-$(CLDIR) --file-patterns "**/*.log,*.pyi" --dir-patterns "./dev_scripts/.allure_*,./.*_reports"
+	-$(PDR) -wd "docs" -ex "make clean"
+	-$(RM) -rf **/$(COVERAGE_PATH) *.log *.pyi  dev_scripts/.allure_reports dev_scripts/.allure_results
 
-help: 
-	help-from-makefile -f ../dev_scripts/package_general.mk -f ./Makefile
+clean-all: ## Clean most common outputs(Logs, Test Results, etc) as well as local install information. Running this requires a new call to setup-dev or setup-dev-no-docker
+	$(IPY) "import os, glob; [os.remove(i) for i in glob.glob('**/$(COVERAGE_PATH)', recursive=True)]"
+	$(MAKEALL) --parallel clean-all
+	$(CLDIR) --file-patterns "**/*.buildlog"
 
+setup-dev: ## Setup packages in dev mode
+	python dev_scripts/bootstrap.py
+	$(MAKE) -C idmtools_platform_local docker
 
-clean: ## Clean most of the temp-data from the project
-	$(MAKE) -C tests clean
-	$(MAKE) -C idmtools_webui clean
-	-$(RM) -rf *.pyc *.pyo *.done *.log .coverage dist build **/__pycache__
+lint: ## check style with flake8
+	flake8
 
-clean-all: clean docker-cleanup ## Deleting package info hides plugins so we only want to do that for packaging
-	$(CLDIR) --dir-patterns "**/*.egg-info/"
-	$(MAKE) -C idmtools_webui clean-all
+test: ## Run default set of tests which exclude comps and docker tests
+	$(MAKEALL) --parallel test
 
-# Release related rules
-dist: clean ## build our package
-	$(MAKE) -C idmtools_webui build-ui
-	$(PY) setup.py sdist
+test-all: ## Run all our tests
+	$(MAKEALL) test-all
 
-docker-cleanup: # Removes docker containers
-	-docker stop idmtools_workers idmtools_postgres idmtools_redis
-	-docker rm idmtools_workers idmtools_postgres idmtools_redis
+test-failed: ## Run only previously failed tests
+	$(MAKEALL) test-failed
 
-# This job is most useful when actively developing changes to the local_platform internals(tasks, api, cli) or
-# upstream changes that effect those areas(models and core). Otherwise, installing from latest in the nightly
-# should suffice for development
-# ensure pypi local is up
-docker: ## Build our docker image using the local pypi without versioning from artifactory
-	$(MAKE) -C ../idmtools_core dist
-	$(MAKE) dist
-	python build_docker_image.py
+test-no-long: ## Run any tests that takes less than 30s on average
+	$(MAKEALL) test-no-long
 
-docker-proper: ## This job gets version data from artifactory. Should be used for production releases
-	$(MAKE) -C ../idmtools_core dist
-	$(MAKE) dist
-	$(PY) build_docker_image.py --proper
+test-docker: ## Run our docker tests
+	$(MAKEALL) test-docker
 
-docker-only: ## Assumes you have made the local package already
-	$(MAKE) -C ../idmtools_core dist
-	python build_docker_image.py
+test-smoke: ## Run our smoke tests
+	$(MAKEALL) test-smoke
 
-docker-only-proper: ## Assumes you have made the local package already without versioning from artifactory
-	$(MAKE) -C ../idmtools_core dist
-	$(PY) build_docker_image.py --proper
+aggregate-html-reports: ## Aggregate html test reports into one directory
+	$(PDS)aggregate_reports.py
+	-echo Serving documentation @ server at http://localhost:8001 . Ctrl + C Will Stop Server
+	$(PDR) -wd '.html_reports' -ex 'python -m http.server 8001'
 
+stop-allure: ## Stop Allure
+	$(PDR) -wd dev_scripts -ex "docker-compose -f allure.yml down -v"
 
+start-allure: ## start the allue docker report server
+	-$(MKDIR) ./dev_scripts/.allure_results
+	-$(MKDIR) ./dev_scripts/.allure_reports
+ifeq ($(OS),Windows_NT)
+	$(PDR) -wd dev_scripts -ex "docker-compose -f allure.yml up -d allure"
+else
+	cd ./dev_scripts/; MY_USER=$(shell id -u):$(shell id -g)  docker-compose -f allure.yml up -d allure
+endif
+	$(IPY) "print('Once tests have finished, your test report will be available at http://localhost:5050/allure-docker-service/latest-report. To clean results, use http://localhost:5050/allure-docker-service/clean-results')"
 
+allure-report: ## Download report as zip
+	$(IPY) "from urllib.request import urlretrieve; urlretrieve('http://localhost:5050/allure-docker-service/report/export', 'allure_report.zip')"
 
+## Run smoke tests with reports to Allure server(Comment moved until https://github.com/tqdm/py-make/issues/11 is resolves)
+test-smoke-allure: start-allure ## Run smoke tests and enable allure
+	$(PDS)run_pymake_on_all.py --env "TEST_EXTRA_OPTS=--alluredir=../../dev_scripts/.allure_results" test-smoke
+	$(PDS)launch_dir_in_browser.py http://localhost:5050/allure-docker-service/latest-report
+
+ ## Run smoke tests with reports to Allure server(Comment moved until https://github.com/tqdm/py-make/issues/11 is resolves)
+test-all-allure: start-allure ## Run all tests and enable allure
+	$(PDS)run_pymake_on_all.py --env "TEST_EXTRA_OPTS=--alluredir=../../dev_scripts/.allure_results" test-all
+	$(PDS)launch_dir_in_browser.py http://localhost:5050/allure-docker-service/latest-report
+
+coverage-report: ## Generate coverage report for tests already ran
+	coverage report -m
+	coverage html -i
+	$(PDS)launch_dir_in_browser.py htmlcov/index.html
+
+coverage: ## Run all tests and then generate a coverage report
+	$(MAKEALL) "coverage-all"
+	coverage combine idmtools_cli/$(COVERAGE_PATH) idmtools_core/$(COVERAGE_PATH) idmtools_models/$(COVERAGE_PATH) idmtools_platform_comps/$(COVERAGE_PATH) idmtools_platform_local/$(COVERAGE_PATH)
+	$(MAKE) coverage-report
+
+coverage-smoke: ## Generate a code-coverage report
+	$(MAKEALL) "coverage-smoke"
+	coverage combine idmtools_cli/$(COVERAGE_PATH) idmtools_core/$(COVERAGE_PATH) idmtools_models/$(COVERAGE_PATH) idmtools_platform_comps/$(COVERAGE_PATH) idmtools_platform_local/$(COVERAGE_PATH)
+	$(MAKE) coverage-report
+
+dist: ## build our package
+	$(MAKEALL) --parallel dist
+
+release-staging: clean-all ## perform a release to staging
+	$(MAKEALL) release-staging
+
+packages-changes-since-last-verison: ## Get list of versions since last release that have changes
+	git diff --name-only $(shell git tag -l --sort=-v:refname | grep -w '[0-9]\.[0-9]\.[0-9]' | head -n 1) HEAD | grep idmtools | cut -d "/" -f 1  | sort | uniq | grep -v ini | grep -v examples | grep -v dev_scripts
+
+linux-dev-env: ## Runs docker dev env
+	$(PDR) -w 'dev_scripts/linux-test-env' -ex 'docker-compose build linuxtst'
+	$(PDR) -w 'dev_scripts/linux-test-env' -ex 'docker-compose run --rm linuxtst'
+
+changelog: ## Generate partial changelog
+	$(PDS)changelog.py
+
+bump-release: #bump the release version.
+	$(MAKEALL) bump-release
+
+# Use before release-staging-release-commit to confirm next version.
+bump-release-dry-run: ## perform a release to staging and bump the minor version.
+	$(MAKEALL) bump-release-dry-run
+
+bump-patch: ## bump the patch version
+	$(MAKEALL) bump-patch
+
+bump-minor: ## bump the minor version
+	$(MAKEALL) bump-minor
+
+bump-major: ## bump the major version
+	$(MAKEALL) bump-major
+
+bump-patch-dry-run: ## bump the patch version(dry run)
+	$(MAKEALL) bump-patch-dry-run
+
+bump-minor-dry-run: ## bump the minor version(dry run)
+	$(MAKEALL) bump-minor-dry-run
+
+bump-major-dry-run: ## bump the major version(dry run)
+	$(MAKEALL) bump-major-dry-run
+
+build-docs: ## build docs
+	$(PDR) -wd 'docs' -ex 'make html'
+
+docs: build-docs ## Alias for build docs
+
+build-docs-server: build-docs ## builds docs and launch a webserver and watches for changes to documentation
+	$(PDS)serve_docs.py
+
+dev-watch: ## Run lint on any python code changes
+	$(PDS)run_commands_and_wait.py --command 'watchmedo shell-command --drop --wait --interval 10 --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --recursive --command="$(MAKE) --ignore-errors lint"' \
+        --command 'watchmedo shell-command --patterns="*.py" --ignore-pattern="*/tests/.test_platform/*" --drop --interval 10 --recursive --command="$(MAKE) test-smoke";;;idmtools_platform_local'
+
+generate-stubs: ## Generate python interfaces. Useful to identify what the next version should be by comparing to previous runs
+	$(PDS)make_stub_files.py  -c dev_scripts/stub.cfg
+	$(PDS)process_interfaces.py

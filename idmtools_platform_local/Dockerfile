@@ -58,9 +58,10 @@ ENV PYTHONPATH=/app:${PYTHONPATH}
 #TODO: Move the actual package to artifactory and install from there. It would simpify the environmetn quite a bit
 
 # make it where we can specifiy our dependent packages at build time
-COPY .depends/* /tmp/
+#COPY .depends/* /tmp/
 RUN python -m pip install --upgrade pip
-RUN bash -c "pip install /tmp/*.gz --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple"
+RUN pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+#RUN bash -c "pip install /tmp/*.gz --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple"
 # Install requirements first to reduce build cache misses
 ADD requirements.txt ui_requirements.txt workers_requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple && \

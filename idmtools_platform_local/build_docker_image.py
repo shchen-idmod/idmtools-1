@@ -1,9 +1,9 @@
 """
 This script is currently a workaround so that we can use bump2version with docker since the nightly versions don't work with docker registry.
 """
-import glob
+# import glob
 import os
-import shutil
+# import shutil
 import subprocess
 import sys
 from getpass import getpass
@@ -49,14 +49,6 @@ if len(sys.argv) == 2 and sys.argv[-1] == "--proper":
         raise Exception('Could not load images')
 else:
     version = f'{base_version}.0'
-
-os.makedirs(os.path.abspath('.depends'), exist_ok=True)
-for root, _dirs, files in os.walk(os.path.join(LOCAL_PACKAGE_DIR, '.depends')):
-    for file in files:
-        os.remove(os.path.join(root, file))
-for package in ['idmtools_core']:
-    for file in glob.glob(os.path.join(BASE_DIR, package, 'dist', '**.gz')):
-        shutil.copy(file, os.path.join(LOCAL_PACKAGE_DIR, '.depends', os.path.basename(file)))
 
 cmd = ['docker', 'build', '--network=host', '--tag',
        f'{REPO_KEY}.{BASE_REPO}/{IMAGE_NAME}:{version}', '.']
