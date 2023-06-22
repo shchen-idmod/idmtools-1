@@ -11,7 +11,6 @@ from idmtools_test.utils.itest_with_persistence import ITestWithPersistence
 model_path = os.path.abspath(os.path.join("..", "..", "examples", "python_model", "inputs", "simple_python", "model.py"))
 
 
-@pytest.mark.skip
 @pytest.mark.serial
 @allure.story("Entities")
 @allure.story("Plugins")
