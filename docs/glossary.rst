@@ -12,9 +12,6 @@ as information relevant to using |IT_s|.
     analyzer
         Functionality that uses the MapReduce framework to process large data sets in parallel, typically on a :term:`high-performance computing (HPC)` cluster. For example, if you would like to focus on specific data points from all simulations in one or more experiments then you can do this using analyzers with |IT_s| and plot the final output.
 
-    asset collection
-        A collection of user created input files, such as demographics, temperature, weather, binaries, and overlay files. These files are stored in |COMPS_s| and can be available for use by other users.
-
     assets
         See :term:`asset collection`.
 
@@ -26,9 +23,6 @@ as information relevant to using |IT_s|.
 
     entity
         Each of the interfaces or classes that are well-defined models, types, and validations for |IT_s| items, such as simulations, analyzers, or tasks.
-
-    |EMOD_s|
-        An agent-based mechanistic disease transmission model built by |IDM_s| that can be used with |IT_s|. See the `EMOD GitHub repo <https://github.com/InstituteforDiseaseModeling/EMOD>`_.
 
     experiment
         Logical grouping of simulations. This allows for managing numerous simulations as a single unit or grouping.
@@ -47,9 +41,6 @@ as information relevant to using |IT_s|.
     simulation
         An individual run of a model. Generally, multiple simulations are run as part
         of an experiement. 
-
-    server-side modeling tools (SSMT)
-        Modeling tools used with |COMPS_s| that handle computation on the server side, rather than the client side, to speed up analysis. 
 
     suite
         Logical grouping of experiments. This allows for managing multiple experiments as a single unit or grouping.

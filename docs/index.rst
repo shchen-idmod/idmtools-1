@@ -100,19 +100,10 @@ Exact workflows for using |IT_s| is user-dependent, and can include any of the t
    :titlesonly:
 
    installation
-   configuration
    platforms/platforms
-   create-sims
-   containers/containers
    parameter-sweeps
-   reports
-   analyzers/analyzers
-   plots   
    reference
-   recipes_index
    cli/cli_index
-   dtkt-convert
-   faq
    glossary
    changelog/changelog
 

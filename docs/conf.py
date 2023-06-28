@@ -102,7 +102,7 @@ author = u'Institute for Disease Modeling'
 #
 # The short X.Y version.
 current_path = os.path.dirname(__file__)
-version_path = os.path.join(current_path, '..', 'idmtools_core', '.bumpversion.cfg')
+version_path = os.path.join(current_path, '..', 'idmtools_platform_local', '.bumpversion.cfg')
 config = configparser.ConfigParser()
 config.read(version_path)
 
