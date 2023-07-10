@@ -41,7 +41,7 @@ source code changes.
 
 #.  Verify installation by pulling up |IT_s| help::
 
-        pip list
+        idmtools --help
 
 #.  When you are finished, deactivate the virtual environment by entering the following at a command prompt::
 
