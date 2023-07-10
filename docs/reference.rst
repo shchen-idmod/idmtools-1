@@ -25,8 +25,6 @@ Local platform
 .. uml:: /diagrams/local.puml
 
 
-   api/idmtools_platform_local_index
-
 API Documentation
 =================
 .. toctree::
