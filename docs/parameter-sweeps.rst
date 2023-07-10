@@ -116,7 +116,7 @@ You can also create sweeps without using builders. Like this example:
         if __name__ == "__main__":
 
             # define our platform
-            platform = Platform('COMPS2')
+            platform = Platform('Local')
 
             # create experiment  object and define some extra assets
             assets_path = os.path.join(COMMON_INPUT_PATH, "python", "Assets")
@@ -151,19 +151,3 @@ You can also create sweeps without using builders. Like this example:
             # use system status as the exit code
             sys.exit(0 if e.succeeded else -1)
 
-
-Running parameter sweeps in specific models
--------------------------------------------
-
-The following pages provide information about running parameter sweeps in particular models, and
-include example scripts.
-
-.. want to add in model-specific sub-pages
-
-.. toctree::
-   :maxdepth: 3
-   :titlesonly:
-   :caption: Model-specific parameter sweep information
-
-   sweeps-python
-   sweeps-emod
