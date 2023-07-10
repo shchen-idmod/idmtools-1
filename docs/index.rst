@@ -100,6 +100,7 @@ Exact workflows for using |IT_s| is user-dependent, and can include any of the t
    :titlesonly:
 
    installation
+   configuration
    platforms/platforms
    parameter-sweeps
    reference
