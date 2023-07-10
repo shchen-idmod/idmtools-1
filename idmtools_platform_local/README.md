@@ -28,6 +28,9 @@ somewhat similar to COMPS, though much more limited
 ## Installing
 
 ```bash
+pip install idmtools-cli --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-models --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
 pip install idmtools-platform-local --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
 ```
 
