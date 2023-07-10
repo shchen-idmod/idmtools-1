@@ -31,5 +31,4 @@ API Documentation
    :maxdepth: 3
    :titlesonly:
 
-   api/idmtools_index
    api/idmtools_platform_local_index
