@@ -12,3 +12,4 @@ For additional information about configuring idmtools.ini, see :doc:`../configur
 
 .. toctree::
    platforms-local
+   platforms-plugin
