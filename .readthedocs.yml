@@ -1,0 +1,50 @@
+# .readthedocs.yml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+build:
+  os: "ubuntu-20.04"
+  tools:
+    python: "3.8"
+  jobs:
+    pre_build:
+      - cd idmtools_core
+      - pip install -e .[test]
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  configuration: docs/conf.py
+  fail_on_warning: true
+
+# Build documentation with MkDocs
+#mkdocs:
+#  configuration: mkdocs.yml
+
+# Optionally build your docs in additional formats such as PDF
+formats:
+  - htmlzip
+  - pdf
+
+# Optionally set the version of Python and requirements required to build your docs
+python:
+
+  install:
+    - requirements: dev_scripts/package_requirements.txt
+    - requirements: docs/requirements.txt
+    - method: pip
+      path: idmtools_platform_local
+      extra_requirements:
+        - test
+        - workers
+        - ui
+    
+# Optionally rank topics in search results, between -10 (lower) and 10 (higher).
+# 0 is normal rank, not no rank
+
+search:
+  ranking:
+    installation.html: 3
+    reference.html: 2
