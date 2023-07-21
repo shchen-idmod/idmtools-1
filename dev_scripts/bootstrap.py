@@ -24,7 +24,7 @@ from logging import getLogger
 from os.path import abspath, join, dirname
 from typing import List, Generator
 
-# on windowns virtual env is not populated through pymake
+# on windows virtual env is not populated through pymake
 if sys.platform == "win32" and 'VIRTUAL_ENV' in os.environ:
     sys.path.insert(0, os.environ['VIRTUAL_ENV'] + "\\Lib\\site-packages")
 
@@ -143,11 +143,6 @@ def install_base_environment(pip_url):
 
     for line in execute(["pip3", "install", "idm-buildtools~=1.0.1", f"--index-url={pip_url}"]):
         process_output(line)
-
-    dev_idmtools_ini = join(base_directory, "examples", "idmtools.ini")
-    if not os.path.exists(dev_idmtools_ini):
-        logger.critical("Placing development ini in examples. This will redirect all request to production to staging!")
-        shutil.copy(join(script_dir, "examples_idmtools.ini"), join(base_directory, "examples", "idmtools.ini"))
 
 
 if __name__ == "__main__":

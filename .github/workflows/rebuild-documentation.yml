@@ -1,0 +1,46 @@
+name: "Rebuild docs"
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'docs/**'
+      - '**/requirements.txt'
+      - 'idmtools_platform_local/.bumpversion.cfg'
+  pull_request:
+    paths:
+      - '**.py'
+      - 'docs/**'
+      - '**/requirements.txt'
+      - 'idmtools_platform_local/.bumpversion.cfg'
+jobs:
+  rebuild-documentation:
+
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'Bump version: ')"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        working-directory: 'docs'
+        run: |
+          sudo apt-get update
+          python -m pip install --upgrade pip idm-buildtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          sudo apt-get install make
+          pip install -r requirements.txt
+      - name: pip install idmtools_cli, core, models
+        run: |
+          python -m pip install idmtools-cli --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          python -m pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          python -m pip install idmtools-test --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          python -m pip install idmtools-models --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+      - name: Install tools in dev mode
+        run: |
+          python dev_scripts/bootstrap.py
+      - name: Build docs
+        working-directory: 'docs'
+        run: |
+          make html
