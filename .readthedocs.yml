@@ -32,9 +32,10 @@ python:
 
   install:
     - requirements: dev_scripts/package_requirements.txt
+    - requirements: .
     - requirements: docs/requirements.txt
-    - method: setuptools
-      path: .
+    - method: pip
+      path: idmtools_platform_local
       extra_requirements:
         - test
         - workers
