@@ -9,10 +9,9 @@ build:
   os: "ubuntu-20.04"
   tools:
     python: "3.8"
-  jobs:
-    pre_build:
-      - cd idmtools_platform_local
-      - pip install -e .[test]
+#  jobs:
+#    pre_build:
+
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
