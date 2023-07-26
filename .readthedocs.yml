@@ -32,7 +32,7 @@ python:
 
   install:
     - requirements: dev_scripts/package_requirements.txt
-    - requirements: .
+    - requirements: idmtools_platform_local/requirements.txt
     - requirements: docs/requirements.txt
     - method: pip
       path: idmtools_platform_local
