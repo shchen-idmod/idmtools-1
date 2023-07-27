@@ -40,8 +40,6 @@ python:
         - test
         - workers
         - ui
-    - method: setuptools
-      path: idmtools_platform_local/.
     
 # Optionally rank topics in search results, between -10 (lower) and 10 (higher).
 # 0 is normal rank, not no rank
