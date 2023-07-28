@@ -52,27 +52,6 @@ clean:
 .PHONY: generate-api
 
 generate-api:
-	-rm ./api/modules.rst
-	-rm ./api/idmtools_index.rst
-	sphinx-apidoc -f -e -M -o ./api --templatedir api_templates ../idmtools_core/idmtools
-	mv ./api/modules.rst ./api/idmtools_index.rst
-
-	-rm ./api/idmtools_models_index.rst
-	sphinx-apidoc -f -e -M -o ./api --templatedir api_templates ../idmtools_models/idmtools_models
-	mv ./api/modules.rst ./api/idmtools_models_index.rst
-
-	-rm ./api/idmtools_platform_comps_index.rst
-	sphinx-apidoc -f -e -M -o ./api --templatedir api_templates ../idmtools_platform_comps/idmtools_platform_comps
-	mv ./api/modules.rst ./api/idmtools_platform_comps_index.rst
-
-	-rm ./api/idmtools_platform_slurm_index.rst
-	sphinx-apidoc -f -e -M -o ./api --templatedir api_templates ../idmtools_platform_slurm/idmtools_platform_slurm
-	mv ./api/modules.rst ./api/idmtools_platform_slurm_index.rst
-
-	-rm ./api/idmtools_slurm_utils_index.rst
-	sphinx-apidoc -f -e -M -o ./api --templatedir api_templates ../idmtools_slurm_utils/idmtools_slurm_utils
-	mv ./api/modules.rst ./api/idmtools_slurm_utils_index.rst
-
 	-rm ./api/idmtools_platform_local_index.rst
 	SPHINX_APIDOC_OPTIONS=members,undoc-members,show-inheritance,ignore-module-all sphinx-apidoc -f -e -M -o ./api --templatedir api_templates  ../idmtools_platform_local/idmtools_platform_local '../idmtools_platform_local/idmtools_platform_local/internals//*'
 	mv ./api/modules.rst ./api/idmtools_platform_local_index.rst

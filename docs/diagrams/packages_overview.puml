@@ -1,0 +1,19 @@
+@startuml
+
+[idmtools]
+note right of idmtools
+Provides Plugin Infrastructure and
+common APIS like Experiments,
+Simulations, Suites, Workitems,
+Tasks, and Platforms. Also contains
+tools for building Simulations in bulk
+end note
+[idmtools-platform-local]
+note left of [idmtools-platform-local]
+    Provides ability to run
+    locally using Docker containers
+end note
+
+[idmtools-platform-local] -up-> idmtools
+
+@enduml

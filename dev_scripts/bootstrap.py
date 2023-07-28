@@ -24,7 +24,7 @@ from logging import getLogger
 from os.path import abspath, join, dirname
 from typing import List, Generator
 
-# on windowns virtual env is not populated through pymake
+# on windows virtual env is not populated through pymake
 if sys.platform == "win32" and 'VIRTUAL_ENV' in os.environ:
     sys.path.insert(0, os.environ['VIRTUAL_ENV'] + "\\Lib\\site-packages")
 
