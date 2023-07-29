@@ -16,7 +16,7 @@ Packages overview
 Packages and APIs
 =================
 
-The following diagrams help illustrate the primary packages and associated APIs available for modeling and development with |IT_s|:
+The following diagrams help illustrate the primary packages and associated APIs available for modeling and development with |IT_l|:
 
 
 Local platform
