@@ -25,3 +25,4 @@
 'idmtools_platform_local.plugin_info.rst' './api/idmtools_platform_local.plugin_info.rst'
 'idmtools_platform_local.rst' './api/idmtools_platform_local.rst'
 'idmtools_platform_local.status.rst' './api/idmtools_platform_local.status.rst'
+'modules.rst' './api/modules.rst'

@@ -2,9 +2,9 @@
 Installation
 ============
 
-You can install |IT_s| in two different ways. If you intend to use |IT_s| as
-|IDM_s| builds it, follow the instructions in :doc:`basic-installation`.
-However, if you intend to modify the |IT_s| source code to add new
+You can install |IT_l| in two different ways. If you intend to use |IT_l| as
+|IDM_l| builds it, follow the instructions in :doc:`basic-installation`.
+However, if you intend to modify the |IT_l| source code to add new
 functionality, follow the instructions in :doc:`dev-installation`. Whichever
 installation method you choose, the prerequisites are the same.
 
@@ -13,9 +13,9 @@ installation method you choose, the prerequisites are the same.
 Prerequisites
 =============
 
-|IT_s| uses Docker to run |IT_s| within a container to keep the |IT_s| environment securely
+|IT_l| uses Docker to run |IT_l| within a container to keep the |IT_l| environment securely
 isolated. You must also have |Python_IT| and Python virtual environments installed to isolate your
-|IT_s| installation in a separate Python environment. If you do not already have these installed,
+|IT_l| installation in a separate Python environment. If you do not already have these installed,
 see the links below for instructions.
 
 * Windows 10 Pro or Enterprise
@@ -29,9 +29,6 @@ see the links below for instructions.
     ``virtualenv``, which requires a separate installation, but ``venv`` is recommended and included with Python 3.3+.
 
 * Docker (https://docs.docker.com/)
-
-  Docker is optional for the basic installation of |IT_s|; it is needed only for running simulations
-  or analysis locally. It is required for the developer installation.
 
 .. toctree::
 
