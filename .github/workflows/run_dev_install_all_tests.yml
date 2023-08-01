@@ -31,6 +31,7 @@ jobs:
           pip install idm-buildtools wheel pygit2 --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
           pip install idmtools-test --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
           pip install idmtools[test] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          pip install idmtools-models --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
       - name: install idmtools
         run: |
           make setup-dev

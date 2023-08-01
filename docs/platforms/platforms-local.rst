@@ -33,13 +33,10 @@ And, you must include the following block in the ``idmtools.ini`` file::
     [Local]
     type = Local
 
-.. note::
-
-    You should be able to use most of the included examples, see :doc:`../cli/cli-examples`, on local platform except for those that use :py:class:`~idmtools.entities.iworkflow_item.IWorkflowItem` or :py:class:`~idmtools.entities.suite.Suite` Python classes.
 
 View simulations and experiments
 ````````````````````````````````
-You can use the dashboard or the CLI for |IT_s| to view and monitor the status of your simulations and experiments.
+You can use the dashboard or the CLI for |IT_l| to view and monitor the status of your simulations and experiments.
 
 The **dashboard** runs on a localhost server on port 5000 (http://localhost:5000). It is recommended that you use Google Chrome to open the dashboard.
 
