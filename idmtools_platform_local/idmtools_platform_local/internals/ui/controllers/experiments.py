@@ -3,18 +3,24 @@
 Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 """
 import logging
+import re
 import shutil
 import sys
 from contextlib import suppress
 from typing import Optional, List, Tuple, Dict
 import backoff
-from flask import current_app
-from flask_restful import Resource, reqparse, abort
+from flask import current_app, request
+from flask_restful import Resource
+from marshmallow.fields import Field
+from webargs import fields
+from webargs.flaskparser import use_kwargs, parser, abort, use_args
 from sqlalchemy import String, func, or_, and_
 from sqlalchemy.exc import ProgrammingError, ResourceClosedError, OperationalError, DatabaseError
+
 from idmtools_platform_local.config import DATA_PATH
 from idmtools_platform_local.internals.data.job_status import JobStatus
-from idmtools_platform_local.internals.ui.controllers.utils import validate_tags
+from idmtools_platform_local.internals.ui.controllers.utils import TagsParser, \
+    validate_tags, _structure_tags
 from idmtools_platform_local.status import Status
 from idmtools_platform_local.internals.ui.config import db
 
@@ -71,7 +77,7 @@ def experiment_filter(id: Optional[str], tags: Optional[List[Tuple[str, str]]], 
         for tag in tags:
             criteria.append((JobStatus.tags[tag[0]].astext.cast(String) == tag[1]))
 
-    query = session.query(JobStatus).filter(*criteria).order_by(JobStatus.uuid.desc()).paginate(page, per_page)
+    query = session.query(JobStatus).filter(*criteria).order_by(JobStatus.uuid.desc()).paginate(page=page, per_page=per_page)
     items = query.items
     total = query.total
 
@@ -103,24 +109,25 @@ def experiment_filter(id: Optional[str], tags: Optional[List[Tuple[str, str]]], 
     return items, total
 
 
-idx_parser = reqparse.RequestParser()
-idx_parser.add_argument('tags', action='append', default=None,
-                        help="Tags tio filter by. Tags must be in format name,value")
-idx_parser.add_argument('page', type=int, default=1, help="Page")
-idx_parser.add_argument('per_page', type=int, default=10, help="Per Page")
-delete_args = reqparse.RequestParser()
-delete_args.add_argument('data', help='Should the data for the experiment and all simulations be deleted as well?',
-                         type=bool,
-                         default=False)
-
-
 class Experiments(Resource):
-    """Experiment API controller."""
-    def get(self, id=None):
-        """Get experiment."""
-        args = idx_parser.parse_args()
-        args['id'] = id
+    newparser = TagsParser()
+    exp_tags = {"tags": fields.List(fields.Tuple([fields.Raw, fields.Raw], many=True))}
 
+    @newparser.location_loader("tags_query_string")
+    def load_data(request, schema):
+        return _structure_tags(request.query_string)
+
+    @use_kwargs({"id": fields.Str(required=False),
+                 "page": fields.Int(missing=1),
+                 "per_page": fields.Int(missing=10)})
+    @use_kwargs(exp_tags, location="tags_query_string")
+    def get(self, id=None, tags=None, page=1, per_page=10):
+        """Get experiment by ID with arbitrary tags."""
+        args = {}
+        args['id'] = request.view_args.get('id')
+        args['tags'] = tags or None  # change from dict to list for tags
+        args['page'] = page
+        args['per_page'] = per_page
         validate_tags(args['tags'])
         result, total = experiment_filter(**args)
         if id:
@@ -128,17 +135,24 @@ class Experiments(Resource):
                 abort(404, message=f"Could not find experiment with id {id}")
             return result[0]
 
-        return result, 200, {'X-Total': total, 'X-Per-Page': args.per_page}
+        return result, 200, {'X-Total': total, 'X-Per-Page': args['per_page']}
 
-    def delete(self, id):
+    @parser.location_loader("data")
+    def load_data(request, schema):
+        data_byte = request.query_string.decode('utf-8')
+        data = data_byte.split('=')
+        return {data[0]: bool(data[1])}
+
+    @use_args({"data": fields.Boolean(required=False)}, location='data')
+    def delete(self, args, id):
         """Delete an experiment."""
-        args = delete_args.parse_args()
+        data = args.get("data")
         session = db.session
         job: JobStatus = session.query(JobStatus).filter(JobStatus.uuid == id).first()
         if job is None:
             abort(400, message=f'Error: No experiment with id of {id}')
 
-        if args['data']:
+        if data:  # hard delete if data is true
             print(f'Deleting {job.data_path}')
             with suppress(FileNotFoundError):
                 shutil.rmtree(job.data_path)

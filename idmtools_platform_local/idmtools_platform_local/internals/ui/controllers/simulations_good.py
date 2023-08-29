@@ -5,22 +5,17 @@ Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 import logging
 import signal
 import os
-import urllib
 from typing import Optional, List, Tuple, Dict
 
 import backoff
 import docker
 from flask import request, current_app
 from flask_restful import Resource, reqparse, abort
-from marshmallow.fields import Field
-from webargs import fields
-from webargs.flaskparser import use_kwargs, parser, abort, use_args
 from sqlalchemy import String
 from sqlalchemy.exc import ResourceClosedError, ProgrammingError, OperationalError, DatabaseError
 
 from idmtools_platform_local.internals.data.job_status import JobStatus
-from idmtools_platform_local.internals.ui.controllers.utils import validate_tags, LocalArgument, TagsParser, \
-    _structure_tags
+from idmtools_platform_local.internals.ui.controllers.utils import validate_tags, LocalArgument
 from idmtools_platform_local.status import Status
 from idmtools_platform_local.internals.ui.config import db
 
@@ -83,49 +78,11 @@ idx_parser.add_argument('tags', action='append', default=None, help="Tags to fil
 
 class Simulations(Resource):
     """Simulation API controller."""
-    newparser = TagsParser()
+    def get(self, id=None):
+        """Get simulation."""
+        args = idx_parser.parse_args()
+        args['simulation_id'] = id
 
-    @newparser.location_loader("tags_query_string")
-    def load_data(request, schema):
-        return _structure_tags(request.query_string)
-
-    def validate_status(value):
-        if value not in status_strs:
-            raise ValueError(f"Status must be one of {', '.join(status_strs)}")
-        return value
-
-    @parser.location_loader("status_str")
-    def load_data(request, schema):
-        status_string = request.query_string.decode('utf-8')
-        parsed_data = urllib.parse.parse_qs(status_string)
-        for key, value in parsed_data.items():
-            if "status" in key and value is not None:
-                return {key: value[0]}
-        return {}
-
-    @parser.location_loader("experiment_str")
-    def load_data(request, schema):
-        exp_id_string = request.query_string.decode('utf-8')
-        parsed_data = urllib.parse.parse_qs(exp_id_string)
-        for key, value in parsed_data.items():
-            if "experiment_id" in key and value is not None:
-                return {key: value[0]}
-        return {}
-
-    @use_kwargs({"id": fields.Str(required=False),
-                 "page": fields.Int(missing=1), "per_page": fields.Int(missing=20)})
-    @use_kwargs({'experiment_id': fields.Str(required=False, default=None)}, location="experiment_str")
-    @use_kwargs({'status': fields.Str(required=False, validate=validate_status)}, location="status_str")
-    @use_kwargs({'tags': fields.List(fields.Tuple([fields.Raw, fields.Raw], many=True))}, location="tags_query_string")
-    def get(self, id=None, experiment_id=None, status=None, tags=None, page=1, per_page=20):
-        """Get simulations."""
-        args = {}
-        args['simulation_id'] = request.view_args.get('id')
-        args['experiment_id'] = experiment_id or None
-        args['status'] = status
-        args['tags'] = tags or None
-        args['page'] = page
-        args['per_page'] = per_page
         validate_tags(args['tags'])
 
         result, total = sim_status(**args)
@@ -134,7 +91,7 @@ class Simulations(Resource):
             if not result:
                 abort(404, message=f"Could not find simulation with id {id}")
             return result[0]
-        return result, 200, {'X-Total': total, 'X-Per-Page': args['per_page']}
+        return result, 200, {'X-Total': total, 'X-Per-Page': args.per_page}
 
     def put(self, id):
         """Update simulation."""

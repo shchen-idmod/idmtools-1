@@ -137,7 +137,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(data['data_path'], '/data/CCCCC')
 
     def test_experiment_filtering(self):
-        result = self.app.get('/api/experiments', query_string=dict(tags='a,b'))
+        result = self.app.get('/api/experiments', query_string=dict(tags=['a,b', 'c,d']))
         self.assertEqual(200, result.status_code)
         data = result.json
         self.assertIsInstance(data, list)
