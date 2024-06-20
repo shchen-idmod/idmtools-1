@@ -34,7 +34,6 @@ jobs:
         run: |
           make setup-dev-no-docker
       - name: login to comps2
-
         run: |
           python dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
         env:
