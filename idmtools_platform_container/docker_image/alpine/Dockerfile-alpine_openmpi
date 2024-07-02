@@ -1,0 +1,46 @@
+FROM alpine:latest
+
+ARG REQUIRE="sudo build-base"
+RUN apk update && apk upgrade \
+      && apk add --no-cache ${REQUIRE}
+RUN apk update\
+      && apk add ca-certificates wget && update-ca-certificates \
+      && apk add openssl \
+      && apk add perl \
+      && apk add python3 \
+      && apk add linux-headers \
+      && apk add nano \
+      && apk add bash
+
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip
+# Create a virtual environment
+RUN python3 -m venv /opt/venv
+
+# Activate virtual environment
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip in the virtual environment
+RUN python3 -m pip install --upgrade pip
+
+# Make a directory for pip configurations (though this might not be necessary)
+RUN mkdir -p /root/.pip
+
+#### INSTALL OPENMPI ####
+RUN apk add --no-cache  openmpi openmpi-dev  openssh-client
+
+ENV PATH ${PATH}:/usr/bin
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/lib
+ENV OMPI_ALLOW_RUN_AS_ROOT 1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM 1
+
+COPY pip.conf /root/.pip
+# Add the requirements file
+ADD requirements.txt /tmp/
+ARG CONTAINER_VERSION
+
+# pip install pyproj --no-binary pyproj
+RUN apk add proj-util proj-dev pkgconfig python3-dev geos-dev findutils
+#RUN python3 -m pip install -r /tmp/requirements.txt
+# Set the default command to bash
+CMD ["/bin/bash"]
