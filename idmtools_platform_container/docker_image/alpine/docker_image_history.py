@@ -1,18 +1,35 @@
+"""This script fetches the history of a Docker image and prints it in a tabular format."""
 import re
 import shutil
 import subprocess
 import pandas as pd
 from tabulate import tabulate
 
+
 def parse_size(size_str):
-    """Parse the size string from Docker and convert to bytes."""
+    """
+    Parse the size string from Docker and convert to bytes.
+    Args:
+        size_str:
+
+    Returns:
+        Size in bytes
+    """
     units = {'B': 1, 'KB': 1024, 'MB': 1024**2, 'GB': 1024**3}
     size_str = size_str.upper().replace(" ", "")
     num, unit = re.findall(r'([0-9.]+)([A-Z]+)', size_str)[0]
     return float(num) * units.get(unit, 1)
 
+
 def format_size(size_in_bytes):
-    """Convert a size in bytes to a human-readable string of the most appropriate unit."""
+    """
+    Convert a size in bytes to a human-readable string of the most appropriate unit.
+    Args:
+        size_in_bytes:
+
+    Returns:
+        Size in human-readable format
+    """
     if size_in_bytes < 1024:
         return f"{size_in_bytes} B"  # Bytes
     elif size_in_bytes < 1024**2:
@@ -23,7 +40,17 @@ def format_size(size_in_bytes):
         return f"{size_in_bytes / 1024**3:.2f} GB"  # Gigabytes
     else:
         return f"{size_in_bytes / 1024**4:.2f} TB"  # Terabytes
+
+
 def get_docker_image_history(image_id_or_name):
+    """
+    Fetch the history of a Docker image.
+    Args:
+        image_id_or_name:
+
+    Returns:
+        df
+    """
     result = subprocess.run(
         ['docker', 'history', '--no-trunc', image_id_or_name, '--format', '{{.ID}}|{{.CreatedBy}}|{{.Size}}'],
         capture_output=True,
@@ -40,15 +67,18 @@ def get_docker_image_history(image_id_or_name):
         if len(line) == 4:
             data[i] = [line[0], line[1] + " " + line[2], line[3]]
     df = pd.DataFrame(data, columns=['LAYER ID', 'COMMAND', 'SIZE'])
-    df = df.iloc[:,-2:]
+    df = df.iloc[:, -2:]
     return df
 
 
 def main():
-    #image_id_or_name = "d5b413f8be21"  # Replace with your image ID or name
-    #image_id_or_name = "idm-docker-staging.packages.idmod.org/idmtools/container-test:0.0.5"
-    #image_id_or_name = "b332b82951bb"  # mpich and requirements.txt
-    image_id_or_name = "d9991b126d99"  # mpich and without requirements.txt
+    """
+    This script fetches the history of a Docker image and prints it in a tabular format.
+    Returns:
+        None
+    """
+    # image_id_or_name = "idm-docker-staging.packages.idmod.org/idmtools/container-test:0.0.5"
+    image_id_or_name = "d9991b126d99"
     df = get_docker_image_history(image_id_or_name)
     total_size = sum(parse_size(size) for size in df['SIZE'])
     size = format_size(total_size)
@@ -56,11 +86,12 @@ def main():
         terminal_width = shutil.get_terminal_size().columns
         max_command_width = terminal_width - 10
         table = tabulate(df, headers='keys', tablefmt='fancy_grid', showindex=False,
-                         maxcolwidths=[None, max_command_width, None])        # Alternatively, use df.to_string(index=False) for plain text formatting
+                         maxcolwidths=[None, max_command_width, None])
         print(table)
         with open('alpine_meta_no_reqs.txt', 'w', encoding='utf-8') as outputfile:
             outputfile.write(f"Total size: {size}\n\n")
             outputfile.write(table)
+
 
 if __name__ == "__main__":
     main()
