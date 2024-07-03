@@ -24,7 +24,7 @@ KEYRING_NAME = "idmtools_container_docker_builder"
 BASE_REPO = 'packages.idmod.org'
 REPO_KEY = 'idm-docker-staging'
 DOCKER_REPO = f'{REPO_KEY}.{BASE_REPO}'
-IMAGE_NAME = 'idmtools/container-alpine-mpich'
+IMAGE_NAME = 'idmtools/container-alpine'
 BASE_IMAGE_NAME = f'{DOCKER_REPO}/{IMAGE_NAME}'
 CURRENT_DIRECTORY = os.path.dirname(__file__)
 BASE_VERSION = open(os.path.join(CURRENT_DIRECTORY, 'BASE_VERSION')).read().strip()
@@ -110,6 +110,7 @@ def build_image(username, password, dockerfile, disable_keyring_load, disable_ke
     Args:
         username: Username to use with registry
         password: Password to use with registry
+        dockerfile: Dockerfile to use for building image
         disable_keyring_load: Disable keyring which caches passwords
         disable_keyring_save: Disable caching password to the keyring
 

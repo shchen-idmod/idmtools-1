@@ -110,6 +110,7 @@ def build_image(username, password, dockerfile, disable_keyring_load, disable_ke
     Args:
         username: Username to use with registry
         password: Password to use with registry
+        dockerfile: Dockerfile to use for building image
         disable_keyring_load: Disable keyring which caches passwords
         disable_keyring_save: Disable caching password to the keyring
 
