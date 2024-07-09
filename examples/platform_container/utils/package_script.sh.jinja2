@@ -1,0 +1,10 @@
+set -o noglob
+echo Running $@
+
+echo "Installing custom packages"
+
+{% for package in packages %}
+    echo "Installing {{ package }}"
+    pip install {{ package }} --extra-index-url=https://packages.idmod.org/api/pypi/pypi-production/simple --upgrade --force-reinstall --no-cache-dir
+{% endfor %}
+$@
