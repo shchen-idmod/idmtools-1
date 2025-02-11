@@ -64,6 +64,13 @@ class PlatformAnalysis:
         See Also:
             :meth:`idmtools.analysis.analyze_manager.AnalyzeManager.__init__`
         """
+        import warnings
+        warnings.warn(
+            "PlatformAnalysis is deprecated and will be removed in a future major release. Please use the new platform_anaylsis2.py.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.platform = platform
         self.experiment_ids = experiment_ids or []
         self.simulation_ids = simulation_ids or []
