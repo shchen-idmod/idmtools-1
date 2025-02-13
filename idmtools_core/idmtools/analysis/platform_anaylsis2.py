@@ -34,7 +34,7 @@ class PlatformAnalysis(IAnalysisManager, BaseAnalyzeManager):
     PlatformAnalysis allows remote analysis on the server.
     """
     analysis_name: str = field(default="Platform Analysis", metadata=dict(help="Name of the analysis."))
-    tags: dict[str, Any] = field(default_factory=dict, metadata=dict(help="Tags for the analysis."))
+    tags: Dict[str, Any] = field(default_factory=dict, metadata=dict(help="Tags for the analysis."))
     additional_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Additional files to include in the analysis."))
     asset_collection_id: str = field(default=None, metadata=dict(help="ID of the asset collection to use."))
     asset_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Asset files to include in the analysis."))
