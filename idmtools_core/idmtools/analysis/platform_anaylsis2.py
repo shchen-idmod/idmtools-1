@@ -12,8 +12,7 @@ import pickle
 import re
 from dataclasses import dataclass, field
 from logging import getLogger, DEBUG
-from typing import List,  Dict, Callable, Union, Type, Any
-
+from typing import List, Dict, Callable, Union, Type, Any
 from idmtools import IdmConfigParser
 from idmtools.analysis.base_analyze_manager import BaseAnalyzeManager
 from idmtools.analysis.ianalyze_manager import IAnalysisManager

@@ -2,7 +2,7 @@
 Analyze Manager Base Class which contains the basic attributes for the analysis manager.
 """
 from dataclasses import field, dataclass
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Optional
 from idmtools.entities.iplatform import IPlatform
 from idmtools.core.enums import ItemType
 from idmtools.entities.ianalyzer import IAnalyzer
@@ -11,7 +11,7 @@ from idmtools.entities.ianalyzer import IAnalyzer
 @dataclass
 class BaseAnalyzeManager:
     """
-    Base class for analysis manager
+    Base class for analysis manager.
     """
     platform: IPlatform = field(default=None, metadata=dict(help="Platform to use for analysis."))
     configuration: dict = field(default=None, metadata=dict(help="Configuration for the analysis."))
@@ -29,4 +29,3 @@ class BaseAnalyzeManager:
                                        metadata=dict(help="Maximum number of workers for parallel processing."))
     executor_type: str = field(default='process',
                                metadata=dict(help="Type of executor to use ('process' or 'thread')."))
-
