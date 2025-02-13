@@ -1,3 +1,6 @@
+"""
+This module contains the interface for analysis management classes.
+"""
 from abc import ABC, abstractmethod
 from idmtools.core.interfaces.ientity import IEntity
 from idmtools.entities.ianalyzer import IAnalyzer

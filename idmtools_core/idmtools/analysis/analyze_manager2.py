@@ -1,6 +1,10 @@
+"""
+Analyze Manager Class. This is the main driver of analysis.
+"""
 import os
 import sys
 import time
+from dataclasses import field, dataclass
 from typing import List, Tuple, Dict, Optional
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from logging import getLogger, DEBUG
@@ -22,11 +26,26 @@ logger = getLogger(__name__)
 user_logger = getLogger('user')
 
 
+@dataclass(repr=False)
 class AnalyzeManager(IAnalysisManager):
     """
     Analyzer Manager Class. This is the main driver of analysis.
     Implements the IAnalysisManager interface.
     """
+    platform: IPlatform = field(default=None)
+    configuration: dict = field(default=None)
+    ids: List[Tuple[str, ItemType]] = field(default_factory=list)
+    analyzers: List[IAnalyzer] = field(default_factory=list)
+    working_dir: str = field(default=None)
+    partial_analyze_ok: bool = field(default=False)
+    max_items: Optional[int] = field(default=None)
+    verbose: bool = field(default=True)
+    force_manager_working_directory: bool = field(default=False)
+    exclude_ids: List[str] = field(default_factory=list)
+    analyze_failed_items: bool = field(default=None)
+    max_workers: Optional[int] = field(default=None)
+    executor_type: str = field(default='process')
+
     ANALYZE_TIMEOUT = 3600 * 8  # Maximum seconds before timing out - set to 8 hours
     WAIT_TIME = 1.15  # How much time to wait between check if the analysis is done
     EXCEPTION_KEY = '__EXCEPTION__'
@@ -43,13 +62,7 @@ class AnalyzeManager(IAnalysisManager):
         """
         pass
 
-    def __init__(self, platform: IPlatform = None, configuration: dict = None,
-                 ids: List[Tuple[str, ItemType]] = None,
-                 analyzers: List[IAnalyzer] = None, working_dir: str = None,
-                 partial_analyze_ok: bool = False, max_items: Optional[int] = None, verbose: bool = True,
-                 force_manager_working_directory: bool = False,
-                 exclude_ids: List[str] = None, analyze_failed_items: bool = False,
-                 max_workers: Optional[int] = None, executor_type: str = 'process'):
+    def __post_init__(self):
         """
         Initialize the AnalyzeManager.
 
@@ -68,43 +81,42 @@ class AnalyzeManager(IAnalysisManager):
             max_workers (int, optional): Set the max workers. If not provided, falls back to the configuration item *max_threads*. If max_workers is not set in configuration, defaults to CPU count
             executor_type: (str): Whether to use process or thread pooling. Process pooling is more efficient but threading might be required in some environments
         """
-        super().__init__()
-        if working_dir is None:
+        if self.working_dir is None:
             working_dir = os.getcwd()
-        if executor_type.lower() in ['process', 'thread']:
-            self.executor_type = executor_type.lower()
+        if self.executor_type.lower() in ['process', 'thread']:
+            self.executor_type = self.executor_type.lower()
         else:
-            raise ValueError(f'{executor_type} is not a valid type for executor_type. Choose either "process" or "thread"')
+            raise ValueError(f'{self.executor_type} is not a valid type for executor_type. Choose either "process" or "thread"')
 
-        self.configuration = configuration or {}
-        self.platform = platform
-        self.__check_for_platform_from_context(platform)
-        if max_workers is None:
+        self.configuration = self.configuration or {}
+        self.platform = self.platform
+        self.__check_for_platform_from_context(self.platform)
+        if self.max_workers is None:
             if self.platform and hasattr(self.platform, '_config_block') and IdmConfigParser.get_option(self.platform._config_block, "max_workers", None):
                 self.configuration['max_workers'] = int(IdmConfigParser.get_option(self.platform._config_block, "max_workers", None))
             elif IdmConfigParser().get_option('COMMON', 'max_workers', None):
                 self.configuration['max_workers'] = int(IdmConfigParser.get_option('COMMON', 'max_workers'))
 
-        if max_workers is not None and max_workers < 1:
+        if self.max_workers is not None and self.max_workers < 1:
             raise ValueError("max_workers must be greater or equal to one")
-        self.max_processes = max_workers if max_workers is not None else self.configuration.get('max_workers', os.cpu_count())
+        self.max_processes = self.max_workers if self.max_workers is not None else self.configuration.get('max_workers', os.cpu_count())
         if logger.isEnabledFor(DEBUG):
             logger.debug(f'AnalyzeManager set to {self.max_processes}')
 
         self.continue_on_error = False
-        self.analyze_failed_items = analyze_failed_items
-        self.max_items_to_analyze = max_items
-        self.partial_analyze_ok = partial_analyze_ok or (self.max_items_to_analyze is not None)
+        self.analyze_failed_items = self.analyze_failed_items
+        self.max_items_to_analyze = self.max_items
+        self.partial_analyze_ok = self.partial_analyze_ok or (self.max_items_to_analyze is not None)
         self.working_dir = working_dir
-        self.force_wd = force_manager_working_directory
-        self.exclude_ids = exclude_ids or []
+        self.force_wd = self.force_manager_working_directory
+        self.exclude_ids = self.exclude_ids or []
         self.potential_items: List[IEntity] = []
         self._items = dict()
-        self.analyzers = analyzers or list()
-        self.verbose = verbose
+        self.analyzers = self.analyzers or list()
+        self.verbose = self.verbose
 
         # Load items from platform
-        ids = list(set(ids or list()))
+        ids = list(set(self.ids or list()))
         items: List[IEntity] = []
         for oid, otype in ids:
             logger.debug(f'Getting metadata for {oid} and {otype}')

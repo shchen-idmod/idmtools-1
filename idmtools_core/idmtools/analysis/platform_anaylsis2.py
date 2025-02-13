@@ -1,7 +1,16 @@
+"""
+Platform Analysis is a wrapper to allow execution of analysis through SSMT vs Locally.
+
+Running remotely has great advantages over local execution with the biggest being more compute resources and less data transfer.
+Platform Analysis tries to make the process of running remotely similar to local execution.
+
+Copyright 2025, Bill Gates Foundation. All rights reserved.
+"""
 import inspect
 import os
 import pickle
 import re
+from dataclasses import dataclass, field
 from logging import getLogger, DEBUG
 from typing import List, Tuple, Dict, Optional, Callable, Union, Type
 
@@ -20,85 +29,73 @@ logger = getLogger(__name__)
 user_logger = getLogger('user')
 
 
+@dataclass(repr=False)
 class PlatformAnalysis(IAnalysisManager):
     """
     PlatformAnalysis allows remote analysis on the server.
-    Implements the IPlatformAnalysis interface.
     """
+    platform: IPlatform
+    ids: List[Tuple[str, ItemType]] = field(default_factory=list, metadata=dict(help="List of items to analyze."))
+    analyzers: List[IAnalyzer] = field(default_factory=list, metadata=dict(help="List of analyzers."))
+    analysis_name: str = field(default=None, metadata=dict(help="Name of the analysis."))
+    tags: List[str] = field(default_factory=list, metadata=dict(help="Tags for the analysis."))
+    additional_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Additional files to include in the analysis."))
+    asset_collection_id: str = field(default=None, metadata=dict(help="ID of the asset collection to use."))
+    asset_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Asset files to include in the analysis."))
+    wait_till_done: bool = field(default=True, metadata=dict(help="If True, wait until the analysis is complete."))
+    idmtools_config: str = field(default=None, metadata=dict(help="Path to the idmtools configuration file."))
+    pre_run_func: Callable = field(default=None, metadata=dict(help="Function to run before the analysis starts."))
+    wrapper_shell_script: str = field(default=None, metadata=dict(help="Path to a wrapper shell script."))
+    verbose: bool = field(default=False, metadata=dict(help="Enable verbose logging."))
+    partial_analyze_ok: bool = field(default=False, metadata=dict(help="Allow partial analysis."))
+    max_items: Optional[int] = field(default=None, metadata=dict(help="Maximum number of items to analyze."))
+    force_manager_working_directory: bool = field(default=False, metadata=dict(help="Force the use of the manager's working directory."))
+    exclude_ids: List[str] = field(default_factory=list, metadata=dict(help="List of item IDs to exclude from analysis."))
+    analyze_failed_items: bool = field(default=False, metadata=dict(help="Allow to analyze failed items."))
+    max_workers: Optional[int] = field(default=None, metadata=dict(help="Maximum number of workers for parallel processing."))
+    executor_type: str = field(default='process', metadata=dict(help="Type of executor to use ('process' or 'thread')."))
 
-    def __init__(self, platform: IPlatform, ids: List[Tuple[str, ItemType]] = None, analyzers: List[IAnalyzer] = None,
-                 analysis_name: str = 'WorkItem Test', tags=None,
-                 additional_files: Union[FileList, AssetCollection, List[str]] = None, asset_collection_id=None,
-                 asset_files: Union[FileList, AssetCollection, List[str]] = None, wait_till_done: bool = True,
-                 idmtools_config: str = None, pre_run_func: Callable = None, wrapper_shell_script: str = None,
-                 verbose: bool = False, partial_analyze_ok: bool = False, max_items: Optional[int] = None,
-                 force_manager_working_directory: bool = False, exclude_ids: List[str] = None,
-                 analyze_failed_items: bool = False, max_workers: Optional[int] = None, executor_type: str = 'process'):
+    def __post_init__(self):
         """
-        Initialize the platform analysis manager.
+        Initialize the PlatformAnalysis object.
 
-        Args:
-            platform: Platform to use for analysis.
-            ids: List of item IDs and their types to analyze.
-            analyzers: List of analyzers to run.
-            analysis_name: Name of the analysis.
-            tags: Tags for the analysis.
-            additional_files: Additional files to include in the analysis.
-            asset_collection_id: ID of the asset collection to use.
-            asset_files: Asset files to include in the analysis.
-            wait_till_done: Whether to wait until the analysis is complete.
-            idmtools_config: Path to the IDM tools configuration file.
-            pre_run_func: Function to run before the analysis starts.
-            wrapper_shell_script: Path to a wrapper shell script.
-            verbose: Whether to enable verbose logging.
-            partial_analyze_ok: Whether partial analysis is allowed.
-            max_items: Maximum number of items to analyze.
-            force_manager_working_directory: Whether to force the use of the manager's working directory.
-            exclude_ids: List of item IDs to exclude from analysis.
-            analyze_failed_items: Whether to analyze failed items.
-            max_workers: Maximum number of workers for parallel processing.
-            executor_type: Type of executor to use ('process' or 'thread').
+        Returns:
+            None
         """
-        self.platform = platform
-        self.ids = ids or []
-        self.analyzers = analyzers or []
-        self.analysis_name = analysis_name
-        self.tags = tags
-        if isinstance(additional_files, list):
-            additional_files = AssetCollection(additional_files)
-        elif isinstance(additional_files, FileList):
-            additional_files = additional_files.to_asset_collection()
+        if isinstance(self.additional_files, list):
+            additional_files = AssetCollection(self.additional_files)
+        elif isinstance(self.additional_files, FileList):
+            additional_files = self.additional_files.to_asset_collection()
+        else:
+            additional_files = self.additional_files  # Default value
         self.additional_files: AssetCollection = additional_files or AssetCollection()
-        self.asset_collection_id = asset_collection_id
-        if isinstance(asset_files, list):
-            asset_files = AssetCollection(asset_files)
-        elif isinstance(asset_files, FileList):
-            asset_files = asset_files.to_asset_collection()
+
+        if isinstance(self.asset_files, list):
+            asset_files = AssetCollection(self.asset_files)
+        elif isinstance(self.asset_files, FileList):
+            asset_files = self.asset_files.to_asset_collection()
+        else:
+            asset_files = self.asset_files
         self.asset_files: AssetCollection = asset_files or AssetCollection()
         self.wi = None
-        self.wait_till_done = wait_till_done
-        self.idmtools_config = idmtools_config
-        self.pre_run_func = pre_run_func
-        self.wrapper_shell_script = wrapper_shell_script
         self.shell_script_binary = "/bin/bash"
-        self.verbose = verbose
         # Store extra arguments in a dictionary
         self.extra_args: Dict = {
-            "partial_analyze_ok": partial_analyze_ok,
-            "max_items": max_items,
-            "force_manager_working_directory": force_manager_working_directory,
-            "exclude_ids": exclude_ids,
-            "analyze_failed_items": analyze_failed_items,
-            "max_workers": max_workers,
-            "executor_type": executor_type,
+            "partial_analyze_ok": self.partial_analyze_ok,
+            "max_items": self.max_items,
+            "force_manager_working_directory": self.force_manager_working_directory,
+            "exclude_ids": self.exclude_ids,
+            "analyze_failed_items": self.analyze_failed_items,
+            "max_workers": self.max_workers,
+            "executor_type": self.executor_type,
         }
 
         self.experiment_ids = []  # Initialize empty lists
         self.simulation_ids = []
         self.work_item_ids = []
 
-        if ids:
-            self._process_ids(ids)  # Process initial IDs
+        if self.ids:
+            self._process_ids(self.ids)  # Process initial IDs
 
     def _process_ids(self, ids):
         """
@@ -152,7 +149,7 @@ class PlatformAnalysis(IAnalysisManager):
 
         # Create an asset collection
         ac = AssetCollection.from_id(self.asset_collection_id,
-                                    platform=self.platform) if self.asset_collection_id else AssetCollection()
+                                     platform=self.platform) if self.asset_collection_id else AssetCollection()
         ac.add_assets(self.asset_files)
 
         # Create the work item
@@ -322,4 +319,3 @@ class PlatformAnalysis(IAnalysisManager):
             new_source.append(replace_expr.sub("", line))
 
         self.additional_files.add_or_replace_asset(Asset(filename="pre_run.py", content="\n".join(new_source)))
-

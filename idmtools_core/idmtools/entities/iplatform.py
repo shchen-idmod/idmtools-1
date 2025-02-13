@@ -1059,6 +1059,13 @@ class IPlatform(IItem, CacheEnabled, metaclass=ABCMeta):
             file_name = f'{exp_id}.csv'
         df.to_csv(os.path.join(output, file_name), header=save_header, index=False)
 
+    @property
+    def config_block(self):
+        """
+        Get the config block used to create the platform.
+        """
+        return self._config_block
+
 
 TPlatform = TypeVar("TPlatform", bound=IPlatform)
 TPlatformClass = Type[TPlatform]
