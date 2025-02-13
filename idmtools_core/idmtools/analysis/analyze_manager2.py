@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from dataclasses import field, dataclass
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from logging import getLogger, DEBUG
 from tqdm import tqdm
@@ -16,36 +16,23 @@ from idmtools.entities.iplatform import IPlatform
 from idmtools import IdmConfigParser
 from idmtools.analysis.map_worker_entry import map_item
 from idmtools.core import NoPlatformException
-from idmtools.core.enums import ItemType
 from idmtools.core.interfaces.ientity import IEntity
 from idmtools.core.logging import VERBOSE, SUCCESS
 from idmtools.entities.ianalyzer import IAnalyzer
 from idmtools.utils.language import on_off, verbose_timedelta
+from idmtools.analysis.base_analyze_manager import BaseAnalyzeManager
 
 logger = getLogger(__name__)
 user_logger = getLogger('user')
 
 
 @dataclass(repr=False)
-class AnalyzeManager(IAnalysisManager):
+class AnalyzeManager(IAnalysisManager, BaseAnalyzeManager):
     """
     Analyzer Manager Class. This is the main driver of analysis.
     Implements the IAnalysisManager interface.
     """
-    platform: IPlatform = field(default=None)
-    configuration: dict = field(default=None)
-    ids: List[Tuple[str, ItemType]] = field(default_factory=list)
-    analyzers: List[IAnalyzer] = field(default_factory=list)
     working_dir: str = field(default=None)
-    partial_analyze_ok: bool = field(default=False)
-    max_items: Optional[int] = field(default=None)
-    verbose: bool = field(default=True)
-    force_manager_working_directory: bool = field(default=False)
-    exclude_ids: List[str] = field(default_factory=list)
-    analyze_failed_items: bool = field(default=None)
-    max_workers: Optional[int] = field(default=None)
-    executor_type: str = field(default='process')
-
     ANALYZE_TIMEOUT = 3600 * 8  # Maximum seconds before timing out - set to 8 hours
     WAIT_TIME = 1.15  # How much time to wait between check if the analysis is done
     EXCEPTION_KEY = '__EXCEPTION__'
@@ -65,24 +52,9 @@ class AnalyzeManager(IAnalysisManager):
     def __post_init__(self):
         """
         Initialize the AnalyzeManager.
-
-        Args:
-            platform (IPlatform): Platform
-            configuration (dict, optional): Initial Configuration. Defaults to None.
-            ids (Tuple[str, ItemType], optional): List of ids as pair of Tuple and ItemType. Defaults to None.
-            analyzers (List[IAnalyzer], optional): List of Analyzers. Defaults to None.
-            working_dir (str, optional): The working directory. Defaults to os.getcwd().
-            partial_analyze_ok (bool, optional): Whether partial analysis is ok. When this is True, Experiments in progress or Failed can be analyzed. Defaults to False.
-            max_items (int, optional): Max Items to analyze. Useful when developing and testing an Analyzer. Defaults to None.
-            verbose (bool, optional): Print extra information about analysis. Defaults to True.
-            force_manager_working_directory (bool, optional): [description]. Defaults to False.
-            exclude_ids (List[str], optional): [description]. Defaults to None.
-            analyze_failed_items (bool, optional): Allows analyzing of failed items. Useful when you are trying to aggregate items that have failed. Defaults to False.
-            max_workers (int, optional): Set the max workers. If not provided, falls back to the configuration item *max_threads*. If max_workers is not set in configuration, defaults to CPU count
-            executor_type: (str): Whether to use process or thread pooling. Process pooling is more efficient but threading might be required in some environments
         """
-        if self.working_dir is None:
-            working_dir = os.getcwd()
+        working_dir = self.working_dir or os.getcwd()
+
         if self.executor_type.lower() in ['process', 'thread']:
             self.executor_type = self.executor_type.lower()
         else:
@@ -92,8 +64,8 @@ class AnalyzeManager(IAnalysisManager):
         self.platform = self.platform
         self.__check_for_platform_from_context(self.platform)
         if self.max_workers is None:
-            if self.platform and hasattr(self.platform, '_config_block') and IdmConfigParser.get_option(self.platform._config_block, "max_workers", None):
-                self.configuration['max_workers'] = int(IdmConfigParser.get_option(self.platform._config_block, "max_workers", None))
+            if self.platform and hasattr(self.platform, '_config_block') and IdmConfigParser.get_option(self.platform.config_block, "max_workers", None):
+                self.configuration['max_workers'] = int(IdmConfigParser.get_option(self.platform.config_block, "max_workers", None))
             elif IdmConfigParser().get_option('COMMON', 'max_workers', None):
                 self.configuration['max_workers'] = int(IdmConfigParser.get_option('COMMON', 'max_workers'))
 

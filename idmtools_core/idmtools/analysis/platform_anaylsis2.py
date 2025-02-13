@@ -12,13 +12,13 @@ import pickle
 import re
 from dataclasses import dataclass, field
 from logging import getLogger, DEBUG
-from typing import List, Tuple, Dict, Optional, Callable, Union, Type
+from typing import List,  Dict, Callable, Union, Type, Any
 
 from idmtools import IdmConfigParser
+from idmtools.analysis.base_analyze_manager import BaseAnalyzeManager
 from idmtools.analysis.ianalyze_manager import IAnalysisManager
 from idmtools.assets.file_list import FileList
 from idmtools.core.interfaces.ientity import IEntity
-from idmtools.entities.iplatform import IPlatform
 from idmtools.entities.ianalyzer import IAnalyzer
 from idmtools.assets import AssetCollection, Asset
 from idmtools.core import ItemType
@@ -30,15 +30,12 @@ user_logger = getLogger('user')
 
 
 @dataclass(repr=False)
-class PlatformAnalysis(IAnalysisManager):
+class PlatformAnalysis(IAnalysisManager, BaseAnalyzeManager):
     """
     PlatformAnalysis allows remote analysis on the server.
     """
-    platform: IPlatform
-    ids: List[Tuple[str, ItemType]] = field(default_factory=list, metadata=dict(help="List of items to analyze."))
-    analyzers: List[IAnalyzer] = field(default_factory=list, metadata=dict(help="List of analyzers."))
-    analysis_name: str = field(default=None, metadata=dict(help="Name of the analysis."))
-    tags: List[str] = field(default_factory=list, metadata=dict(help="Tags for the analysis."))
+    analysis_name: str = field(default="Platform Analysis", metadata=dict(help="Name of the analysis."))
+    tags: dict[str, Any] = field(default_factory=dict, metadata=dict(help="Tags for the analysis."))
     additional_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Additional files to include in the analysis."))
     asset_collection_id: str = field(default=None, metadata=dict(help="ID of the asset collection to use."))
     asset_files: Union[FileList, AssetCollection, List[str]] = field(default=None, metadata=dict(help="Asset files to include in the analysis."))
@@ -46,14 +43,6 @@ class PlatformAnalysis(IAnalysisManager):
     idmtools_config: str = field(default=None, metadata=dict(help="Path to the idmtools configuration file."))
     pre_run_func: Callable = field(default=None, metadata=dict(help="Function to run before the analysis starts."))
     wrapper_shell_script: str = field(default=None, metadata=dict(help="Path to a wrapper shell script."))
-    verbose: bool = field(default=False, metadata=dict(help="Enable verbose logging."))
-    partial_analyze_ok: bool = field(default=False, metadata=dict(help="Allow partial analysis."))
-    max_items: Optional[int] = field(default=None, metadata=dict(help="Maximum number of items to analyze."))
-    force_manager_working_directory: bool = field(default=False, metadata=dict(help="Force the use of the manager's working directory."))
-    exclude_ids: List[str] = field(default_factory=list, metadata=dict(help="List of item IDs to exclude from analysis."))
-    analyze_failed_items: bool = field(default=False, metadata=dict(help="Allow to analyze failed items."))
-    max_workers: Optional[int] = field(default=None, metadata=dict(help="Maximum number of workers for parallel processing."))
-    executor_type: str = field(default='process', metadata=dict(help="Type of executor to use ('process' or 'thread')."))
 
     def __post_init__(self):
         """
@@ -250,7 +239,7 @@ class PlatformAnalysis(IAnalysisManager):
 
         # Pickle the extra args
         if len(self.extra_args):
-            from idmtools.analysis.analyze_manager import AnalyzeManager
+            from idmtools.analysis.analyze_manager2 import AnalyzeManager
             argspec = inspect.signature(AnalyzeManager.__init__)
             for argname, value in self.extra_args.items():
                 if argname not in argspec.parameters:
