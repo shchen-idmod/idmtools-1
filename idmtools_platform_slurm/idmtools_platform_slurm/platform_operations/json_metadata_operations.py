@@ -65,7 +65,7 @@ class JSONMetadataOperations(imetadata_operations.IMetadataOperations):
         """
         if not isinstance(item, (Suite, Experiment, Simulation)):
             raise RuntimeError(f"get_metadata_filepath method supports Suite/Experiment/Simulation only.")
-        item_dir = self.platform._op_client.get_directory(item)
+        item_dir = self.platform.get_directory(item)
         filepath = Path(item_dir, self.metadata_filename)
         return filepath
 
@@ -181,7 +181,7 @@ class JSONMetadataOperations(imetadata_operations.IMetadataOperations):
         if not isinstance(item, (Suite, SlurmSuite, Experiment, SlurmExperiment)):
             raise RuntimeError(f"Get children method supports [Slurm]Suite and [Slurm]Experiment only.")
         item_list = []
-        item_dir = self.platform._op_client.get_directory_by_id(item.id, item.item_type)
+        item_dir = self.platform.get_directory_by_id(item.id, item.item_type)
         pattern = f'*/{self.metadata_filename}'
         for meta_file in item_dir.glob(pattern=pattern):
             meta = self.load_from_file(meta_file)

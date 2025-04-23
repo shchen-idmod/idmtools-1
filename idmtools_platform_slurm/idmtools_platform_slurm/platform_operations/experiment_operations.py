@@ -64,18 +64,18 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
             experiment.parent = suite
 
         # Generate Suite/Experiment/Simulation folder structure
-        self.platform._op_client.mk_directory(experiment, exist_ok=False)
+        self.platform.mk_directory(experiment, exist_ok=False)
         meta = self.platform._metas.dump(experiment)
         self.platform._assets.dump_assets(experiment)
-        self.platform._op_client.create_batch_file(experiment, **kwargs)
+        self.platform.create_batch_file(experiment, **kwargs)
 
         # Copy file run_simulation.sh
         run_simulation_script = Path(__file__).parent.parent.joinpath('assets/run_simulation.sh')
-        dest_script = Path(self.platform._op_client.get_directory(experiment)).joinpath('run_simulation.sh')
+        dest_script = Path(self.platform.get_directory(experiment)).joinpath('run_simulation.sh')
         shutil.copy(str(run_simulation_script), str(dest_script))
 
         # Make executable
-        self.platform._op_client.update_script_mode(dest_script)
+        self.platform._slurm_op.update_script_mode(dest_script)
 
         # Return Slurm Experiment
         return SlurmExperiment(meta)
@@ -95,7 +95,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         sim_meta_list = self.platform._metas.get_children(experiment)
         for meta in sim_meta_list:
             slurm_sim = SlurmSimulation(meta)
-            slurm_sim.status = self.platform._op_client.get_simulation_status(slurm_sim.id)
+            slurm_sim.status = self.platform._slurm_op.get_simulation_status(slurm_sim.id)
             if raw:
                 sim_list.append(slurm_sim)
             else:
@@ -134,7 +134,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         self.platform._metas.dump(experiment)
         # Commission
         if not dry_run:
-            self.platform._op_client.submit_job(experiment, **kwargs)
+            self.platform._slurm_op.submit_job(experiment, **kwargs)
 
         suite_id = experiment.parent_id or experiment.suite_id
 
@@ -177,7 +177,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
             AssetCollection if configuration is set and configuration.asset_collection_id is set.
         """
         assets = AssetCollection()
-        assets_dir = Path(self.platform._op_client.get_directory_by_id(experiment.id, ItemType.EXPERIMENT), 'Assets')
+        assets_dir = Path(self.platform.get_directory_by_id(experiment.id, ItemType.EXPERIMENT), 'Assets')
         if assets_dir.exists():
             assets_list = AssetCollection.assets_from_directory(assets_dir, recursive=True)
             for a in assets_list:
@@ -227,14 +227,14 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
             Dict of simulation id as key and working dir as value
         """
         # Check if file job_id.txt exists
-        job_id_path = self.platform._op_client.get_directory(experiment).joinpath('job_id.txt')
+        job_id_path = self.platform.get_directory(experiment).joinpath('job_id.txt')
         if not job_id_path.exists():
             logger.debug(f'job_id is not available for experiment: {experiment.id}')
             return
 
         # Refresh status for each simulation
         for sim in experiment.simulations:
-            sim.status = self.platform._op_client.get_simulation_status(sim.id, **kwargs)
+            sim.status = self.platform._slurm_op.get_simulation_status(sim.id, **kwargs)
 
     def create_sim_directory_map(self, experiment_id: str) -> Dict:
         """
@@ -247,7 +247,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         """
         exp = self.platform.get_item(experiment_id, ItemType.EXPERIMENT, raw=False)
         sims = exp.simulations
-        return {sim.id: str(self.platform._op_client.get_directory(sim)) for sim in sims}
+        return {sim.id: str(self.platform.get_directory(sim)) for sim in sims}
 
     def platform_delete(self, experiment_id: str) -> None:
         """
@@ -259,7 +259,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         """
         exp = self.platform.get_item(experiment_id, ItemType.EXPERIMENT, raw=False)
         try:
-            shutil.rmtree(self.platform._op_client.get_directory(exp))
+            shutil.rmtree(self.platform.get_directory(exp))
         except RuntimeError:
             logger.info("Could not delete the associated experiment...")
             return
@@ -276,11 +276,11 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         experiment = self.platform.get_item(experiment_id, ItemType.EXPERIMENT, raw=False)
         if force or experiment.status == EntityStatus.RUNNING:
             logger.debug(f"cancel slurm job for experiment: {experiment_id}...")
-            job_id = self.platform._op_client.get_job_id(experiment_id, ItemType.EXPERIMENT)
+            job_id = self.platform.get_job_id(experiment_id, ItemType.EXPERIMENT)
             if job_id is None:
                 logger.debug(f"Slurm job for experiment: {experiment_id} is not available!")
             else:
-                result = self.platform._op_client.cancel_job(job_id)
+                result = self.platform._slurm_op.cancel_job(job_id)
                 user_logger.info(f"Cancel Experiment {experiment_id}: {result}")
         else:
             user_logger.info(f"Experiment {experiment_id} is not running, no cancel needed...")
@@ -297,7 +297,7 @@ class SlurmPlatformExperimentOperations(IPlatformExperimentOperations):
         """
         super().post_run_item(experiment, **kwargs)
 
-        job_ids = self.platform._op_client.get_job_id(experiment.id, ItemType.EXPERIMENT)
+        job_ids = self.platform.get_job_id(experiment.id, ItemType.EXPERIMENT)
         if job_ids is None:
             logger.debug(f"Slurm job for experiment: {experiment.id} is not available!")
             user_logger.info("Slurm Job Ids: None")

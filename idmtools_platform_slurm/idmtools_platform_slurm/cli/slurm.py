@@ -88,7 +88,7 @@ def get_status(ctx: click.Context, sim_id, exp_id):
     platform = Platform('SLURM_LOCAL', job_directory=job_dir)
 
     if sim_id is not None:
-        status = platform._op_client.get_simulation_status(sim_id)
+        status = platform._file_op.get_simulation_status(sim_id)
     elif exp_id is not None:
         exp = platform.get_item(exp_id, ItemType.EXPERIMENT)
         status = exp.status
@@ -108,13 +108,13 @@ def get_job(ctx: click.Context, sim_id, exp_id, suite_id):
     platform = Platform('SLURM_LOCAL', job_directory=job_dir)
 
     if sim_id is not None:
-        job_id = platform._op_client.get_job_id(sim_id, ItemType.SIMULATION)
+        job_id = platform.get_job_id(sim_id, ItemType.SIMULATION)
     elif exp_id is not None:
-        job_id = platform._op_client.get_job_id(exp_id, ItemType.EXPERIMENT)
+        job_id = platform.get_job_id(exp_id, ItemType.EXPERIMENT)
     elif suite_id is not None:
         suite = platform.get_item(suite_id, ItemType.SUITE)
         exp_id = suite.experiments[0].id
-        job_id = platform._op_client.get_job_id(exp_id, ItemType.EXPERIMENT)
+        job_id = platform.get_job_id(exp_id, ItemType.EXPERIMENT)
     else:
         raise Exception('Must provide at least one: suite-id, exp-id or sim-id!')
 

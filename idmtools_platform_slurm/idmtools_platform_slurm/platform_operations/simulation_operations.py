@@ -41,7 +41,7 @@ class SlurmPlatformSimulationOperations(IPlatformSimulationOperations):
         if len(metas) > 0:
             # update status - data analysis may need this
             slurm_sim = SlurmSimulation(metas[0])
-            slurm_sim.status = self.platform._op_client.get_simulation_status(slurm_sim.id)
+            slurm_sim.status = self.platform._slurm_op.get_simulation_status(slurm_sim.id)
             return slurm_sim
         else:
             raise RuntimeError(f"Not found Simulation with id '{simulation_id}'")
@@ -58,14 +58,14 @@ class SlurmPlatformSimulationOperations(IPlatformSimulationOperations):
         simulation.name = clean_experiment_name(simulation.experiment.name if not simulation.name else simulation.name)
 
         # Generate Simulation folder structure
-        self.platform._op_client.mk_directory(simulation, exist_ok=False)
+        self.platform.mk_directory(simulation, exist_ok=False)
         meta = self.platform._metas.dump(simulation)
         self.platform._assets.link_common_assets(simulation)
         self.platform._assets.dump_assets(simulation)
-        self.platform._op_client.create_batch_file(simulation, **kwargs)
+        self.platform.create_batch_file(simulation, **kwargs)
 
         # Make command executable
-        self.platform._op_client.make_command_executable(simulation)
+        self.platform._slurm_op.make_command_executable(simulation)
 
         # Return Slurm Simulation
         slurm_sim = SlurmSimulation(meta)
@@ -180,7 +180,7 @@ class SlurmPlatformSimulationOperations(IPlatformSimulationOperations):
             Dict of simulation id as key and working dir as value
         """
         sim = self.platform.get_item(simulation_id, ItemType.SIMULATION, raw=False)
-        return {sim.id: str(self.platform._op_client.get_directory_by_id(simulation_id, ItemType.SIMULATION))}
+        return {sim.id: str(self.platform.get_directory_by_id(simulation_id, ItemType.SIMULATION))}
 
     def platform_delete(self, sim_id: str) -> None:
         """
@@ -192,7 +192,7 @@ class SlurmPlatformSimulationOperations(IPlatformSimulationOperations):
         """
         sim = self.platform.get_item(sim_id, ItemType.SIMULATION, raw=False)
         try:
-            shutil.rmtree(self.platform._op_client.get_directory(sim))
+            shutil.rmtree(self.platform.get_directory(sim))
         except RuntimeError:
             logger.info(f"Could not delete the simulation: {sim_id}..")
             return
@@ -209,12 +209,12 @@ class SlurmPlatformSimulationOperations(IPlatformSimulationOperations):
         sim = self.platform.get_item(sim_id, ItemType.SIMULATION, raw=False)
         if force or sim.status == EntityStatus.RUNNING:
             logger.debug(f"cancel slurm job for simulation: {sim_id}...")
-            job_id = self.platform._op_client.get_job_id(sim_id, ItemType.SIMULATION)
+            job_id = self.platform.get_job_id(sim_id, ItemType.SIMULATION)
             if job_id is None:
                 logger.debug(f"Slurm job for simulation: {sim_id} is not available!")
                 return
             else:
-                result = self.platform._op_client.cancel_job(job_id)
+                result = self.platform._slurm_op.cancel_job(job_id)
                 user_logger.info(f"Cancel Simulation: {sim_id}: {result}")
                 return result
         else:

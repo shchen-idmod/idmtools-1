@@ -1,7 +1,7 @@
 """
 Here we implement the SlurmPlatform object.
 
-Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
+Copyright 2025, Gates Foundation. All rights reserved.
 """
 import os
 from pathlib import Path
@@ -20,11 +20,11 @@ from idmtools_platform_slurm.platform_operations.asset_collection_operations imp
     SlurmPlatformAssetCollectionOperations
 from idmtools_platform_slurm.platform_operations.experiment_operations import SlurmPlatformExperimentOperations
 from idmtools_platform_slurm.platform_operations.simulation_operations import SlurmPlatformSimulationOperations
-from idmtools_platform_slurm.slurm_operations.operations_interface import SlurmOperations
 from idmtools_platform_slurm.slurm_operations.slurm_constants import SlurmOperationalMode
 from idmtools_platform_slurm.platform_operations.suite_operations import SlurmPlatformSuiteOperations
 from idmtools_platform_slurm.platform_operations.utils import SlurmSuite, SlurmExperiment, SlurmSimulation, \
     get_max_array_size
+from idmtools_platform_slurm.slurm_operations.slurm_operations import SlurmOperations
 from idmtools_platform_slurm.utils.slurm_job import run_script_on_slurm, slurm_installed
 
 logger = getLogger(__name__)
@@ -125,7 +125,7 @@ class SlurmPlatform(IPlatform):
     _simulations: SlurmPlatformSimulationOperations = field(**op_defaults, repr=False, init=False)
     _assets: SlurmPlatformAssetCollectionOperations = field(**op_defaults, repr=False, init=False)
     _metas: JSONMetadataOperations = field(**op_defaults, repr=False, init=False)
-    _op_client: SlurmOperations = field(**op_defaults, repr=False, init=False)
+    _slurm_op: SlurmOperations = field(**op_defaults, repr=False, init=False)
 
     def __post_init__(self):
         if isinstance(self.mode, str):
@@ -167,10 +167,9 @@ class SlurmPlatform(IPlatform):
             raise NotImplementedError("SSH mode has not been implemented on the Slurm Platform")
         elif self.mode == SlurmOperationalMode.BRIDGED:
             from idmtools_platform_slurm.slurm_operations.bridged_operations import BridgedLocalSlurmOperations
-            self._op_client = BridgedLocalSlurmOperations(platform=self)
+            self._slurm_op = BridgedLocalSlurmOperations(platform=self)
         else:
-            from idmtools_platform_slurm.slurm_operations.local_operations import LocalSlurmOperations
-            self._op_client = LocalSlurmOperations(platform=self)
+            self._slurm_op = SlurmOperations(platform=self)
 
         self._suites = SlurmPlatformSuiteOperations(platform=self)
         self._experiments = SlurmPlatformExperimentOperations(platform=self)
@@ -298,7 +297,21 @@ class SlurmPlatform(IPlatform):
         Returns:
             item file directory
         """
-        return self._op_client.get_directory(item)
+        return self._slurm_op.get_directory(item)
+
+    def mk_directory(self, item: Union[Suite, Experiment, Simulation] = None, dest: Union[Path, str] = None,
+                     exist_ok: bool = True) -> None:
+        """
+        Make a new directory.
+        Args:
+            item: Suite/Experiment/Simulation
+            dest: the folder path
+            exist_ok: True/False
+
+        Returns:
+            None
+        """
+        self._slurm_op.mk_directory(item, dest, exist_ok)
 
     def get_directory_by_id(self, item_id: str, item_type: ItemType) -> Path:
         """
@@ -309,4 +322,38 @@ class SlurmPlatform(IPlatform):
         Returns:
             item file directory
         """
-        return self._op_client.get_directory_by_id(item_id, item_type)
+        return self._slurm_op.get_directory_by_id(item_id, item_type)
+
+    def create_batch_file(self, item: Union[Experiment, Simulation], **kwargs) -> None:
+        """
+        Create batch file.
+        Args:
+            item: the item to build batch file for
+            kwargs: keyword arguments used to expand functionality.
+        Returns:
+            None
+        """
+        self._slurm_op.create_batch_file(item, **kwargs)
+
+    def get_job_id(self, item_id: str, item_type: ItemType) -> List:
+        """
+        Retrieve the job id for item that had been run.
+        Args:
+            item_id: id of experiment/simulation
+            item_type: ItemType (Experiment or Simulation)
+        Returns:
+            List of slurm job ids
+        """
+        if item_type not in (ItemType.EXPERIMENT, ItemType.SIMULATION):
+            raise RuntimeError(f"Not support item type: {item_type}")
+
+        item_dir = self.get_directory_by_id(item_id, item_type)
+        job_id_file = item_dir.joinpath('job_id.txt')
+        if not job_id_file.exists():
+            logger.debug(f"{job_id_file} not found.")
+            return None
+
+        job_id = open(job_id_file).read().strip()
+        return job_id.split('\n')
+
+

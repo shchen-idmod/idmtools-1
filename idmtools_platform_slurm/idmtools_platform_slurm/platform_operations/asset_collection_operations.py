@@ -65,9 +65,9 @@ class SlurmPlatformAssetCollectionOperations(IPlatformAssetCollectionOperations)
             None
         """
         if common_asset_dir is None:
-            common_asset_dir = Path(self.platform._op_client.get_directory(simulation.parent), 'Assets')
-        link_dir = Path(self.platform._op_client.get_directory(simulation), 'Assets')
-        self.platform._op_client.link_dir(common_asset_dir, link_dir)
+            common_asset_dir = Path(self.platform._slurm_op.get_directory(simulation.parent), 'Assets')
+        link_dir = Path(self.platform._slurm_op.get_directory(simulation), 'Assets')
+        self.platform._slurm_op.link_dir(common_asset_dir, link_dir)
 
     def get_assets(self, simulation: Union[Simulation, SlurmSimulation], files: List[str], **kwargs) -> Dict[
         str, bytearray]:
@@ -82,7 +82,7 @@ class SlurmPlatformAssetCollectionOperations(IPlatformAssetCollectionOperations)
         """
         ret = dict()
         if isinstance(simulation, (Simulation, SlurmSimulation)):
-            sim_dir = self.platform._op_client.get_directory_by_id(simulation.id, ItemType.SIMULATION)
+            sim_dir = self.platform.get_directory_by_id(simulation.id, ItemType.SIMULATION)
             for file in files:
                 asset_file = Path(sim_dir, file)
                 if asset_file.exists():
@@ -107,10 +107,10 @@ class SlurmPlatformAssetCollectionOperations(IPlatformAssetCollectionOperations)
         """
         exclude = exclude if exclude is not None else EXCLUDE_FILES
         if isinstance(item, Experiment):
-            assets_dir = Path(self.platform._op_client.get_directory(item), 'Assets')
+            assets_dir = Path(self.platform._slurm_op.get_directory(item), 'Assets')
             return AssetCollection.assets_from_directory(assets_dir, recursive=True)
         elif isinstance(item, Simulation):
-            assets_dir = self.platform._op_client.get_directory(item)
+            assets_dir = self.platform.get_directory(item)
             asset_list = AssetCollection.assets_from_directory(assets_dir, recursive=True)
             assets = [asset for asset in asset_list if asset.filename not in exclude]
             return assets
@@ -148,9 +148,9 @@ class SlurmPlatformAssetCollectionOperations(IPlatformAssetCollectionOperations)
         if isinstance(item, Experiment):
             self.pre_create(item.assets)
             exp_asset_dir = Path(self.platform.get_directory(item), 'Assets')
-            self.platform._op_client.mk_directory(dest=exp_asset_dir)
+            self.platform.mk_directory(dest=exp_asset_dir)
             for asset in item.assets:
-                self.platform._op_client.mk_directory(dest=exp_asset_dir.joinpath(asset.relative_path), exist_ok=True)
+                self.platform.mk_directory(dest=exp_asset_dir.joinpath(asset.relative_path), exist_ok=True)
                 self.copy_asset(asset, exp_asset_dir.joinpath(asset.relative_path))
             self.post_create(item.assets)
         elif isinstance(item, Simulation):

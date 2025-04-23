@@ -52,7 +52,7 @@ class SlurmPlatformSuiteOperations(IPlatformSuiteOperations):
             Slurm Suite object created
         """
         # Generate Suite folder structure
-        self.platform._op_client.mk_directory(suite, exist_ok=False)
+        self.platform.mk_directory(suite, exist_ok=False)
         meta = self.platform._metas.dump(suite)
 
         # Return Slurm Suite
@@ -172,12 +172,12 @@ class SlurmPlatformSuiteOperations(IPlatformSuiteOperations):
         exps = suite.experiments
         for exp in exps:
             try:
-                shutil.rmtree(self.platform._op_client.get_directory(exp))
+                shutil.rmtree(self.platform.get_directory(exp))
             except RuntimeError:
                 logger.info("Could not delete the associated experiment...")
                 return
         try:
-            shutil.rmtree(self.platform._op_client.get_directory(suite))
+            shutil.rmtree(self.platform.get_directory(suite))
         except RuntimeError:
             logger.info(f"Could not delete suite ({suite_id})...")
             return
