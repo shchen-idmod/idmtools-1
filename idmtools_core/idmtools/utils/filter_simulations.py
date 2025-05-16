@@ -15,7 +15,7 @@ class FilterItem:
     """
 
     @staticmethod
-    def filter_item(platform: IPlatform, item: IEntity, skip_sims=None, max_simulations: int = None, **kwargs):
+    def filter_item(platform: IPlatform, item: IEntity, skip_sims=None, max_simulations: int = None, entity_type: bool = False, **kwargs):
         """
         Filter simulations from Experiment or Suite, by default it filter status with Succeeded.
 
@@ -82,7 +82,10 @@ class FilterItem:
         sims_final = sims_id_filtered[0:max_simulations if max_simulations else len(sims_id_filtered)]
 
         # only return uid
-        return [s.uid for s in sims_final]
+        if entity_type:
+            return sims_final
+        else:
+            return [s.id for s in sims_final]
 
     @classmethod
     def filter_item_by_id(cls, platform: IPlatform, item_id: UUID, item_type: ItemType = ItemType.EXPERIMENT, skip_sims=None, max_simulations: int = None, **kwargs):
