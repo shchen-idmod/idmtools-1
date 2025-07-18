@@ -1102,5 +1102,6 @@ class IPlatform(IItem, CacheEnabled, metaclass=ABCMeta):
         """
         return self._config_block
 
+
 TPlatform = TypeVar("TPlatform", bound=IPlatform)
 TPlatformClass = Type[TPlatform]
