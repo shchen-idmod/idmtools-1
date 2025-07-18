@@ -326,10 +326,7 @@ class IPlatform(IItem, CacheEnabled, metaclass=ABCMeta):
             ce = item or self.get_item(item_id, raw=raw, item_type=item_type)
             ce.platform = self
             kwargs['parent'] = ce
-            if raw:
-                children = self._get_children_for_platform_item(ce, raw=raw, **kwargs)
-            else:
-                children = self._get_children_for_platform_item(ce.get_platform_object(), raw=raw, **kwargs)
+            children = self._get_children_for_platform_item(ce.get_platform_object(), raw=raw, **kwargs)
             self.cache.set(cache_key, children, expire=self._object_cache_expiration)
             return children
 
@@ -1098,6 +1095,12 @@ class IPlatform(IItem, CacheEnabled, metaclass=ABCMeta):
         return item.get_simulations_by_tags(tags=tags, status=status, entity_type=entity_type, skip_sims=skip_sims,
                                             max_simulations=max_simulations, **kwargs)
 
+    @property
+    def config_block(self):
+        """
+        Get the config block used to create the platform.
+        """
+        return self._config_block
 
 TPlatform = TypeVar("TPlatform", bound=IPlatform)
 TPlatformClass = Type[TPlatform]
