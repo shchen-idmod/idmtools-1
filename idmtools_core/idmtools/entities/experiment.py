@@ -221,7 +221,7 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
                 from idmtools.core import NoPlatformException
                 raise NoPlatformException("The object has no platform set...")
             suite = self.platform.get_item(self.parent_id, ItemType.SUITE, force=True)
-            self.parent = suite
+            suite.add_experiment(self)
 
         return self._parent
 
@@ -708,6 +708,22 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
             max_simulations=max_simulations,
             **kwargs
         )
+
+    def check_duplicate(self, simulation_id: str) -> bool:
+        """
+        Check if a simulation ID already exists.
+        Args:
+            simulation_id: given Simulation ID
+        Returns:
+            True/False
+        """
+        if isinstance(self.simulations.items, (list, set)):
+            ids = [sim.id for sim in self.simulations.items]
+            return simulation_id in ids
+        elif isinstance(self.simulations.items, TemplatedSimulations):
+            return self.simulations.items.check_duplicate(simulation_id)
+        else:
+            return False
 
 
 class ExperimentSpecification(ExperimentPluginSpecification):
