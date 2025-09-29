@@ -306,5 +306,13 @@ class TemplatedSimulations:
         return TemplatedSimulations(base_task=task, tags=tags)
 
     def check_duplicate(self, simulation_id: str) -> bool:
+        """
+        Check if a simulation id is already present in the templated simulations.
+        Args:
+            simulation_id:
+
+        Returns:
+            True if the id is already present, False otherwise.
+        """
         ids = [sim.id for sim in self.__extra_simulations]
         return simulation_id in ids

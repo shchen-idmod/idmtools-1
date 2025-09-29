@@ -37,7 +37,6 @@ from idmtools.utils.entities import get_default_tags
 
 if TYPE_CHECKING:  # pragma: no cover
     from idmtools.entities.iplatform import IPlatform
-    from idmtools.entities.simulation import Simulation  # noqa: F401
 
 logger = getLogger(__name__)
 user_logger = getLogger('user')
@@ -680,7 +679,6 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
         Returns:
             None
         """
-        # self.simulations.append(item)
         if not isinstance(item, Simulation):
             raise ValueError("You can only add Simulation objects")
 
@@ -704,7 +702,6 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
         Returns:
             None
         """
-        #self.simulations.extend(item)
         if isinstance(sims, TemplatedSimulations):
             sims_iter = sims.extra_simulations() if sims.extra_simulations() else sims
         elif isinstance(sims, list):
