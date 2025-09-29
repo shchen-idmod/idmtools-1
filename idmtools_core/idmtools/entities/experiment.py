@@ -25,6 +25,7 @@ from idmtools.core.logging import SUCCESS, NOTICE
 from idmtools.entities.itask import ITask
 from idmtools.core.interfaces.ientity import IEntity
 from idmtools.entities.platform_requirements import PlatformRequirements
+from idmtools.entities.simulation import Simulation
 from idmtools.entities.templated_simulation import TemplatedSimulations
 from idmtools.registry.experiment_specification import ExperimentPluginSpecification, get_model_impl, \
     get_model_type_impl
@@ -32,6 +33,7 @@ from idmtools.registry.plugin_specification import get_description_impl
 from idmtools.utils.caller import get_caller
 from idmtools.utils.collections import ExperimentParentIterator
 from idmtools.utils.entities import get_default_tags
+
 
 if TYPE_CHECKING:  # pragma: no cover
     from idmtools.entities.iplatform import IPlatform
@@ -213,17 +215,24 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
         Returns:
             Parent entity if set
         """
-        if not self._parent:
-            self.parent_id = self.parent_id or self.suite_id
-            if not self.parent_id:
-                return None
-            if not self.platform:
-                from idmtools.core import NoPlatformException
-                raise NoPlatformException("The object has no platform set...")
-            suite = self.platform.get_item(self.parent_id, ItemType.SUITE, force=True)
-            suite.add_experiment(self)
+        if self._parent:
+            return self._parent
 
-        return self._parent
+        # Try to resolve if IDs exist but parent not yet loaded
+        pid = self.parent_id or self.suite_id
+        if not pid:
+            return None
+
+        if not self.platform:
+            from idmtools.core import NoPlatformException
+            raise NoPlatformException("The object has no platform set...")
+
+        suite = self.platform.get_item(pid, ItemType.SUITE, force=True)
+        # Note: let Suite.add_experiment handle wiring if not already linked
+        # Cache result so we don’t hit platform repeatedly
+        self._parent = suite
+        self.parent_id = suite.id
+        return suite
 
     @parent.setter
     def parent(self, parent: 'IEntity'):
@@ -237,7 +246,10 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
             None
         """
         if parent is not None:
-            parent.add_experiment(self)
+            self._parent = parent
+            self.parent_id = self.suite_id = getattr(parent, "id", None)
+            if hasattr(parent, "experiments") and self not in parent.experiments:
+                parent.experiments.append(self)
         else:
             self._parent = self.parent_id = self.suite_id = None
 
@@ -668,17 +680,53 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
         Returns:
             None
         """
-        self.simulations.append(item)
+        # self.simulations.append(item)
+        if not isinstance(item, Simulation):
+            raise ValueError("You can only add Simulation objects")
 
-    def add_simulations(self, item: Union[List['Simulation'], 'TemplatedSimulations']):  # noqa F821
+        # Avoid duplicates by ID
+        if any(s.id == item.id for s in self.simulations.items):
+            return
+
+        # Link back to experiment (safe: passive setter)
+        if item.parent is not self:
+            item.parent = self
+
+        # Append only if not already present
+        if item not in self.simulations.items:
+            self.simulations.append(item)
+
+    def add_simulations(self, sims: Union[List['Simulation'], 'TemplatedSimulations']):  # noqa F821
         """
         Extends experiment's simulations.
         Args:
-            item: Item to extend
+            sims: sims to extend
         Returns:
             None
         """
-        self.simulations.extend(item)
+        #self.simulations.extend(item)
+        if isinstance(sims, TemplatedSimulations):
+            sims_iter = sims.extra_simulations() if sims.extra_simulations() else sims
+        elif isinstance(sims, list):
+            sims_iter = sims
+        else:
+            raise ValueError("add_simulations expects a list[Simulation] or TemplatedSimulations")
+
+        for sim in sims_iter:
+            if not isinstance(sim, Simulation):
+                raise ValueError(f"Invalid object type {type(sim)} in add_simulations; expected Simulation")
+
+            # Avoid duplicates by ID
+            if any(s.id == sim.id for s in self.simulations.items):
+                continue
+
+            # Link back to experiment
+            if sim.parent is not self:
+                sim.parent = self
+
+            # Append only if not already present
+            if sim not in self.simulations.items:
+                self.simulations.append(sim)
 
     def get_simulations_by_tags(self, tags=None, status=None, skip_sims=None, entity_type=False, max_simulations=None,
                                 **kwargs) -> List[str]:

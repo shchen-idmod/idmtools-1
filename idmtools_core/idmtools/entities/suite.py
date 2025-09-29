@@ -39,7 +39,7 @@ class Suite(INamedEntity, ABC, IRunnableEntity):
         """
         Initialize Suite.
         """
-        self.experiments = []
+        self.experiments = EntityContainer()
 
     def add_experiment(self, experiment: 'Experiment') -> 'NoReturn':  # noqa: F821
         """
@@ -48,16 +48,18 @@ class Suite(INamedEntity, ABC, IRunnableEntity):
         Args:
             experiment: the experiment to be linked to suite
         """
-        # Link the suite to the experiment. Assumes the experiment suite setter adds the experiment to the suite.
-        experiment._parent = self
-        experiment.parent_id = experiment.suite_id = self.id
-
-        ids = [exp.uid for exp in self.experiments]
-        if experiment.uid in ids:
+        # Avoid duplicates first
+        if any(exp.uid == experiment.uid for exp in self.experiments):
             return
 
-        # add experiment
-        self.experiments.append(experiment)
+        # Link experiment back to suite using setter (passive)
+        # If experiment already points to this suite, don’t overwrite
+        if experiment.parent is not self:
+            experiment.parent = self
+
+        # Add only if not already present
+        if experiment not in self.experiments:
+            self.experiments.append(experiment)
 
     def display(self):
         """
@@ -179,7 +181,7 @@ class Suite(INamedEntity, ABC, IRunnableEntity):
         # First call parent's __setstate__ to restore base attributes
         super().__setstate__(state)
         # Restore the pickle fields with values requested
-        self.experiments = []
+        self.experiments = EntityContainer()
 
 
 ISuiteClass = Type[Suite]
