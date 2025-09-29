@@ -248,7 +248,7 @@ class Experiment(IAssetsEnabled, INamedEntity, IRunnableEntity):
         if parent is not None:
             self._parent = parent
             self.parent_id = self.suite_id = getattr(parent, "id", None)
-            if hasattr(parent, "experiments") and self not in parent.experiments:
+            if hasattr(parent, "experiments") and all(exp.uid != self.uid for exp in parent.experiments):
                 parent.experiments.append(self)
         else:
             self._parent = self.parent_id = self.suite_id = None
