@@ -35,7 +35,7 @@ class ContainerPlatform(FilePlatform):
     """
     Container Platform definition.
     """
-    #__CONTAINER_IMAGE = 'docker-production-public.packages.idmod.org/idmtools/container-rocky-runtime:0.0.4'
+    # __CONTAINER_IMAGE = 'docker-production-public.packages.idmod.org/idmtools/container-rocky-runtime:0.0.4'
     __CONTAINER_IMAGE = 'ghcr.io/institutefordiseasemodeling/container-rocky-runtime:0.0.5'
     __CONTAINER_MOUNT = "/home/container_data"
     docker_image: str = field(default=None, metadata=dict(help="Docker image to run the container"))

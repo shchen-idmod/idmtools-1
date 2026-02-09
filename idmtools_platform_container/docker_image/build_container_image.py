@@ -279,7 +279,7 @@ def build_image(
     ]
 
     logger.info(f'Building: {" ".join(build_cmd)}')
-    print(f" Building image...\n")
+    print(" Building image...\n")
 
     build_result = subprocess.run(
         build_cmd,
@@ -319,7 +319,7 @@ def build_image(
     # Push if requested
     if push:
         logger.info("Pushing images to ghcr.io...")
-        print(f" Pushing to GitHub Container Registry...\n")
+        print(" Pushing to GitHub Container Registry...\n")
 
         # Determine which tags to push
         tags_to_push = [version, 'latest']
@@ -339,8 +339,8 @@ def build_image(
                 print(f"      Push failed: {push_result.stderr}")
                 return push_result.returncode
 
-            logger.info(f" Successfully pushed: {full_image}:{tag}")
-            print(f"       Pushed successfully")
+            logger.info(" Successfully pushed: {full_image}:{tag}")
+            print("       Pushed successfully")
 
         # Display final summary
         print("\n{'=' * 60}")
@@ -363,24 +363,24 @@ def build_image(
                 print(f"  Version: {version}")
                 print(f"  Size:    {size_mb:.2f} MB")
                 print(f"  Tags:    {', '.join(tags_to_push)}")
-                print(f"\n  Pull command:")
+                print("\n  Pull command:")
                 print(f"    docker pull {full_image}:{version}")
 
             except Exception as e:
                 logger.debug(f"Could not display image details: {e}")
 
-        print(f"{'=' * 60}\n")
+        print("{'=' * 60}\n")
 
     else:
-        print(f"\n{'=' * 60}")
-        print(f"  Build Complete - Not Pushed")
-        print(f"{'=' * 60}")
-        print(f"  To push manually, run:")
+        print("\n{'=' * 60}")
+        print("  Build Complete - Not Pushed")
+        print("{'=' * 60}")
+        print("  To push manually, run:")
         print(f"    docker push {full_image}:{version}")
         if base_version:
             print(f"    docker push {full_image}:{base_version}")
         print(f"    docker push {full_image}:latest")
-        print(f"{'=' * 60}\n")
+        print("{'=' * 60}\n")
 
     return 0
 
@@ -468,5 +468,5 @@ Authentication:
         sys.exit(130)
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=True)
-        print(f"\n Error: {e}")
+        print("\n Error: {e}")
         sys.exit(1)
