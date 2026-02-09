@@ -3,7 +3,6 @@
 Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 """
 import functools
-import os
 import re
 from logging import getLogger
 from typing import Optional, List, Dict
@@ -16,7 +15,6 @@ logger = getLogger(__name__)
 
 PKG_PYPI = 'https://pypi.org/pypi/{}/json'
 GHCR_ORG = 'institutefordiseasemodeling'  # Default organization name
-#GHCR_ORG = 'shchen-idmod'  # Default organization name
 GHCR_IMAGE = 'idmtools-comps-ssmt-worker'
 GHCR_PRODUCTION = f"ghcr.io/{GHCR_ORG}/{GHCR_IMAGE}"
 GHCR_STAGING = f"ghcr.io/{GHCR_ORG}/{GHCR_IMAGE}-staging"

@@ -45,7 +45,7 @@ def get_dependency_packages():
         for file in files:
             os.remove(os.path.join(root, file))
     for package in ['idmtools_core', 'idmtools_models', 'idmtools_platform_comps']:
-        for file in glob.glob(os.path.join(BASE_DIR, package, 'dist', '**.gz')):
+        for file in glob.glob(os.path.join(BASE_DIR, package, 'dist', '*.tar.gz')):
             shutil.copy(file, os.path.join(LOCAL_PACKAGE_DIR, '.depends', os.path.basename(file)))
 
 
@@ -67,7 +67,7 @@ def get_github_token(disable_keyring_load=False, disable_keyring_save=False):
         tuple: (username, token)
     """
     # Try environment variables first
-    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GITHUB_TOKEN')
+    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
 
     if token:
         logger.info("Using GitHub token from environment variable")
@@ -214,7 +214,7 @@ def build_image(username, token, disable_keyring_load, disable_keyring_save, use
         base_version = '.'.join(version_parts[:3])
         tag_cmd = f'docker tag {image}:{version} {image}:{base_version}'
         logger.info(f"Creating base version tag: {base_version}")
-        os.system(tag_cmd)
+        subprocess.run(tag_cmd, check=True)
     else:
         logger.warning(f"Unexpected version format: {version}")
         base_version = None
