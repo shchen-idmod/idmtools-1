@@ -3,12 +3,10 @@
 Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 """
 import functools
-import operator
 import json
 import os
 import re
 from abc import ABC
-from datetime import datetime
 from logging import getLogger, DEBUG
 from typing import Optional, List, Type, Dict, Tuple
 from urllib import request
@@ -395,6 +393,7 @@ def get_latest_tag_dockerhub(image_path: str) -> str:
     except Exception as e:
         logger.warning(f"Could not determine latest tag: {e}")
         return 'latest'
+
 
 def get_digest_from_docker_hub(repo, tag='latest'):
     """

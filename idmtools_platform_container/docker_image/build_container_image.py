@@ -246,12 +246,12 @@ def build_image(
     # Full image path
     full_image = f'{GHCR_BASE}/{image_name}'
 
-    print(f"\n{'=' * 60}")
-    print(f"Building Docker Image for GHCR")
-    print(f"{'=' * 60}")
+    print("\n{'=' * 60}")
+    print("Building Docker Image for GHCR")
+    print("{'=' * 60}")
     print(f"  Image: {full_image}")
     print(f"  Dockerfile: {dockerfile}")
-    print(f"{'=' * 60}\n")
+    print("{'=' * 60}\n")
 
     # Login to GHCR if pushing and not skipping login
     if push and not skip_login:
@@ -292,7 +292,7 @@ def build_image(
         return build_result.returncode
 
     logger.info(f" Successfully built: {full_image}:{version}")
-    print(f"\n Build successful!")
+    print("\n Build successful!")
 
     # Tag base version (e.g., 1.0.0.5 -> 1.0.0)
     version_parts = version.split('.')
@@ -307,14 +307,14 @@ def build_image(
         subprocess.run(tag_cmd, check=True)
 
     # Display tagged images
-    print(f"\n{'=' * 60}")
-    print(f" Tagged Images")
-    print(f"{'=' * 60}")
+    print("\n{'=' * 60}")
+    print(" Tagged Images")
+    print("{'=' * 60}")
     print(f"  {full_image}:{version}")
     if base_version:
         print(f"  {full_image}:{base_version}")
     print(f"  {full_image}:latest")
-    print(f"{'=' * 60}\n")
+    print("{'=' * 60}\n")
 
     # Push if requested
     if push:
@@ -343,9 +343,9 @@ def build_image(
             print(f"       Pushed successfully")
 
         # Display final summary
-        print(f"\n{'=' * 60}")
-        print(f" All Images Pushed Successfully")
-        print(f"{'=' * 60}")
+        print("\n{'=' * 60}")
+        print(" All Images Pushed Successfully")
+        print("{'=' * 60}")
 
         # Get and display image info
         inspect_cmd = ['docker', 'inspect', f'{full_image}:{version}']

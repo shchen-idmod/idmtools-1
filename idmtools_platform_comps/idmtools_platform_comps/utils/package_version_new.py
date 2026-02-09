@@ -166,6 +166,7 @@ def get_latest_docker_image_version_from_ghcr(
 
     return version_tags[0]
 
+
 def get_ghcr_manifest(
         image_name: str,
         tag: str = 'latest',
@@ -324,6 +325,7 @@ def _extract_platform_manifest(
     except Exception as e:
         logger.error(f"Error extracting platform manifest: {e}")
         return None
+
 
 def get_ghcr_image_info(
         image_name: str,
@@ -676,6 +678,7 @@ def get_latest_compatible_version(pkg_name, base_version=None, versions=None, va
 
 def get_next_docker_image_version_from_ghcr() -> str:
     """
+    Get next docker image version from GHCR.
     Returns the next recommended version, incrementing the build number
     of the latest matching BASE_VERSION tag.
     """

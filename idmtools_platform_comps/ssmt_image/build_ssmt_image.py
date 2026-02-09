@@ -252,7 +252,7 @@ def build_image(username, token, disable_keyring_load, disable_keyring_save, use
                     # Get first element if list, otherwise use as-is
                     info = image_info[0] if isinstance(image_info, list) else image_info
 
-                    print(f"\nImage Details:")
+                    print("\nImage Details:")
                     print(f"  Image: {image}:{tag}")
                     print(f"  Tags: {', '.join(info.get('RepoTags', []))}")
                     print(f"  Size: {info.get('Size', 0) / (1024 ** 2):.2f} MB")
