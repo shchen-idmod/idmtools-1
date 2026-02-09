@@ -1,4 +1,4 @@
-name: build_container_image_ghcr.yml
+name: build_container_image.yml
 on:
   workflow_dispatch:
 
