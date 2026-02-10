@@ -36,7 +36,7 @@ RUN pip3 install -U pip && \
     pip install pygit2
 
 #idm-comps
-RUN bash -c "pip3 install idm-comps --index-url=https://test.pypi.org/simple --extra-index-url=https://pypi.org/simple"
+RUN bash -c "pip3 install https://github.com/InstituteforDiseaseModeling/idmtools/releases/download/pycomps.2.11.0/pyCOMPS-2.11.0-py2.py3-none-any.whl"
 RUN bash -c "pip3 install /tmp/*.gz --index-url=https://pypi.org/simple"
 
 # make the PIP index configurable so we can build against staging, production, or a local PyPI server

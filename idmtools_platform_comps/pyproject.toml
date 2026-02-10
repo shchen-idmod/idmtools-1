@@ -37,9 +37,8 @@ classifiers = [
 ]
 dependencies = [
     "idmtools>=0.0.0,<1.0.0",
-    #"pyCOMPS~=2.11",
-    "idm-comps",
     "natsort~=8.4.0",
+    "pycomps @ https://github.com/InstituteforDiseaseModeling/idmtools/releases/download/pycomps.2.11.0/pyCOMPS-2.11.0-py2.py3-none-any.whl"
 ]
 
 [project.urls]

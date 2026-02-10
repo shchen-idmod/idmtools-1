@@ -36,6 +36,7 @@ classifiers = [
 ]
 dependencies = [
     "idmtools>=0.0.0,<1.0.0",
+    "pycomps @ https://github.com/InstituteforDiseaseModeling/idmtools/releases/download/pycomps.2.11.0/pyCOMPS-2.11.0-py2.py3-none-any.whl"
 ]
 
 [project.urls]
@@ -44,7 +45,6 @@ Homepage = "https://github.com/InstituteforDiseaseModeling/idmtools"
 [project.optional-dependencies]
 test = [
     "idmtools[test]",
-    "pyCOMPS~=2.11",
     "idmtools_test",
     "matplotlib~=3.10"
 ]
