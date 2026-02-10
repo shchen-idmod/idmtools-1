@@ -3,7 +3,6 @@
 Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 """
 import functools
-import os
 import re
 from logging import getLogger
 from typing import Optional, List, Dict
@@ -16,7 +15,6 @@ logger = getLogger(__name__)
 
 PKG_PYPI = 'https://pypi.org/pypi/{}/json'
 GHCR_ORG = 'institutefordiseasemodeling'  # Default organization name
-#GHCR_ORG = 'shchen-idmod'  # Default organization name
 GHCR_IMAGE = 'idmtools-comps-ssmt-worker'
 GHCR_PRODUCTION = f"ghcr.io/{GHCR_ORG}/{GHCR_IMAGE}"
 GHCR_STAGING = f"ghcr.io/{GHCR_ORG}/{GHCR_IMAGE}-staging"
@@ -167,6 +165,7 @@ def get_latest_docker_image_version_from_ghcr(
         return matching[0] if matching else None
 
     return version_tags[0]
+
 
 def get_ghcr_manifest(
         image_name: str,
@@ -326,6 +325,7 @@ def _extract_platform_manifest(
     except Exception as e:
         logger.error(f"Error extracting platform manifest: {e}")
         return None
+
 
 def get_ghcr_image_info(
         image_name: str,
@@ -678,6 +678,7 @@ def get_latest_compatible_version(pkg_name, base_version=None, versions=None, va
 
 def get_next_docker_image_version_from_ghcr() -> str:
     """
+    Get next docker image version from GHCR.
     Returns the next recommended version, incrementing the build number
     of the latest matching BASE_VERSION tag.
     """
