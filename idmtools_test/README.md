@@ -14,7 +14,7 @@
 ## Installing
 
 ```bash
-pip install idmtools-test --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-test
 ```
 
 # Testing tips

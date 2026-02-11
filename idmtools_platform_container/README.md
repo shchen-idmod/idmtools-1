@@ -53,15 +53,15 @@
 
 - Install all **container** platform related packages
     ```bash
-    pip install idmtools[container] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+    pip install idmtools[container]
     ```
 - Optional: Install all **idmtools** packages
     ```bash
-    pip install idmtools[full] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+    pip install idmtools[full]
     ```
 - To **override** existing idmtools container related packages after installing emodpy, run this command
     ```bash
-    pip install idmtools[container] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple --force-reinstall --no-cache-dir --upgrade
+    pip install idmtools[container] --force-reinstall --no-cache-dir --upgrade
     ``` 
   **Mac user**: You map need to escape the square brackets with a backslash like `\[container\]` or `\[full\]` in above command.
 
@@ -177,6 +177,6 @@ idmtools container history [<container-id>] [-l <limit>] [-n <next>]
 
 ## Note
 
-- **WorkItem** is not supported on the Container Platform as it is not needed in most cases since the code already runs on user's local computer.
-- **AssetCollection** creation or referencing to an existing AssetCollection are not supported on the Container Platform with current release. If you've used the COMPS Platform, you may have scripts using these objects. You would need to update these scripts without using these objects in order to run them on the Container Platform.
-- Run with **Singularity** is not needed with Container Platform. If you take existing COMPS example and try to run it with Container Platform, you may need to remove the code that setups the singularity image.
+- **WorkItem** is not supported on the Container Platform as it is unnecessary in most cases since the code already runs on the user's local computer.
+- **AssetCollection** creation or referencing to an existing AssetCollection are not supported on the Container Platform with the current release. If you've used the COMPS Platform, you may have scripts using these objects. You would need to update these scripts without using these objects in order to run them on the Container Platform.
+- Run with **Singularity** is not needed with Container Platform. If you take an existing COMPS example and try to run it with Container Platform, you may need to remove the code that sets up the singularity image.
