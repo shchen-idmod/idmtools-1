@@ -214,7 +214,7 @@ def build_image(username, token, disable_keyring_load, disable_keyring_save, use
         base_version = '.'.join(version_parts[:3])
         tag_cmd = f'docker tag {image}:{version} {image}:{base_version}'
         logger.info(f"Creating base version tag: {base_version}")
-        subprocess.run(tag_cmd, check=True)
+        subprocess.run(tag_cmd, shell=True, check=True)
     else:
         logger.warning(f"Unexpected version format: {version}")
         base_version = None
