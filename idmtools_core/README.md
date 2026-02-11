@@ -23,7 +23,7 @@ To see the full API documentation, see https://institutefordiseasemodeling.githu
 # Installing
 
 ```bash
-pip install idmtools --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools
 ```
 
 # Development Tips

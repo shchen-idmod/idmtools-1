@@ -16,7 +16,7 @@
 ## Installing
 
 ```bash
-pip install idmtools-platform-comps --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-platform-comps
 ```
 
 # Development Tips
