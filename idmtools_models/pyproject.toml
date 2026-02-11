@@ -35,8 +35,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "idmtools>=0.0.0,<1.0.0",
-    "pycomps @ https://github.com/InstituteforDiseaseModeling/idmtools/releases/download/pycomps.2.11.0/pyCOMPS-2.11.0-py2.py3-none-any.whl"
+    "idmtools>=0.0.0,<1.0.0"
 ]
 
 [project.urls]
@@ -46,7 +45,8 @@ Homepage = "https://github.com/InstituteforDiseaseModeling/idmtools"
 test = [
     "idmtools[test]",
     "idmtools_test",
-    "matplotlib~=3.10"
+    "matplotlib~=3.10",
+    "idm-pycomps>=2.11.0"
 ]
 packaging = [
     "flake8",
