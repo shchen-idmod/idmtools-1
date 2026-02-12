@@ -1,5 +1,5 @@
 """This is a workaround script to get docker versions working with pip versions and to automate build of those images.
-
+This build script is deprecated — migrate to the new Docker build script: build_ssmt_image.py --push.
 Copyright 2021, Bill & Melinda Gates Foundation. All rights reserved.
 """
 import os

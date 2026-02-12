@@ -25,8 +25,6 @@ authors = [
     { name = "Benoit Raybaud", email = "braybaud@idmod.org" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -37,8 +35,7 @@ classifiers = [
 dependencies = [
     "idmtools>=0.0.0,<1.0.0",
     "pytest",
-    "pypiwin32==223; sys_platform == 'win32'",
-    "pywin32; sys_platform == 'win32'",
+    "pywin32>=306; sys_platform == 'win32'",
 ]
 
 [project.urls]
