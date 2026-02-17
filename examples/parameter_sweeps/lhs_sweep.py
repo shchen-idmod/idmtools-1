@@ -7,7 +7,6 @@ run analysis after all simulations complete.
 """
 
 from scipy.stats import qmc
-
 from idmtools.assets import AssetCollection
 from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
@@ -17,15 +16,15 @@ from idmtools_models.python.singularity_json_python_task import SingularityJSONC
 
 # Create COMPS platform
 platform = Platform("SlurmStage")  # or "COMPS", "Calculon", etc.
-
+sif_name = "python_minimal.sif"
 # Create base task for simulations
 # First, create command for SingularityJSONConfiguredPythonTask's provided_command
 command = CommandLine(
-    f"singularity exec ./Assets/python_minimal.sif python3 Assets/run_model_and_plot.py",
+    f"singularity exec ./Assets/{sif_name} python3 Assets/run_model_and_plot.py",
 )
 task = SingularityJSONConfiguredPythonTask(provided_command=command, script_path="inputs/run_model_and_plot.py")
 # Add Singularity as COMPS assets
-task.common_assets.add_assets(AssetCollection.from_id_file("../singularity/definitions/python_minimal.sif.id"))  # Upload sif id 3eec2bb7-250c-f111-9318-f0921c167864 in comps2
+task.common_assets.add_assets(AssetCollection.from_id_file(f"../singularity/definitions/{sif_name}.id"))  # Upload sif id 3eec2bb7-250c-f111-9318-f0921c167864 in comps2
 # Add model.py which run_model_and_plot.py needed.
 # Note, run_model_and_plot.py will auto upload to comps with SingularityJSONConfiguredPythonTask
 task.transient_assets.add_asset("inputs/sir-model-config.py")
