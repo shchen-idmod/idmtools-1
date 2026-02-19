@@ -98,7 +98,7 @@ jobs:
             github.actor == 'dependabot-preview[bot]'
           )
         run: |
-          cd idmtools_cli/tests
+          cd idmtools_cli
           PARALLEL_TEST_COUNT=2 make test-all
       - name: Upload idmtools_cli all test results
         uses: actions/upload-artifact@v4
