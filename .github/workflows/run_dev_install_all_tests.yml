@@ -37,9 +37,9 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: ['3.13']
-    env:
-      PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
-      PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
+#    env:
+#      PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
+#      PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     # Run for:
     # 1) Manual workflow_dispatch
     # 2) Dependabot pull requests ONLY
@@ -106,7 +106,7 @@ jobs:
           )
         run: |
           cd idmtools_cli
-          PARALLEL_TEST_COUNT=2 make test-all
+          make test-all
       - name: Upload idmtools_cli all test results
         uses: actions/upload-artifact@v4
         if: failure()
