@@ -37,9 +37,6 @@ jobs:
       matrix:
         os: [ ubuntu-latest ]
         python-version: ['3.13']
-#    env:
-#      PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
-#      PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     # Run for:
     # 1) Manual workflow_dispatch
     # 2) Dependabot pull requests ONLY
@@ -86,10 +83,6 @@ jobs:
           python dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
         env:
           COMPS_PASS: ${{ secrets.COMPS_PASSWORD }}
-#      - name: login to docker staging
-#        run: |
-#          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login idm-docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
-#          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
       - name: run idmtools_cli tests
         if: >-
           (
@@ -106,8 +99,7 @@ jobs:
           )
         run: |
           cd idmtools_cli/tests
-          mkdir -p reports
-          py.test --timeout=600 --junitxml=reports/test_results.xml --html=reports/cli.test_results.html --self-contained-html  -n 2 -m "not serial and not performance"
+          PARALLEL_TEST_COUNT=2 make test-all
       - name: Upload idmtools_cli all test results
         uses: actions/upload-artifact@v4
         if: failure()
