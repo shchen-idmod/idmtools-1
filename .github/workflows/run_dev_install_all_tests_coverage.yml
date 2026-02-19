@@ -31,13 +31,15 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ]
-        python-version: ['3.12']
+        python-version: ['3.13']
     env:
       PYPI_STAGING_USERNAME: ${{ secrets.PYPI_STAGING_USERNAME }}
       PYPI_STAGING_PASSWORD: ${{ secrets.PYPI_STAGING_PASSWORD }}
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch full history and all tags
       - name: ${{ matrix.os }} Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
