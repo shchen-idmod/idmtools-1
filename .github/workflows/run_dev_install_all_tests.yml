@@ -77,7 +77,7 @@ jobs:
 
       - name: install idmtools
         run: |
-          make setup-dev-no-docker
+          python dev_scripts/bootstrap.py
       - name: login to comps2
 
         run: |
