@@ -75,7 +75,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Install Python dependencies
         run: |
-          pip install idm-buildtools wheel pygit2
+          pip install wheel pygit2
 
       - name: install idmtools
         run: |
