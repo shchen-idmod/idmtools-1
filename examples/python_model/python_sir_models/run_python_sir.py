@@ -4,7 +4,7 @@ from idmtools.core.platform_factory import Platform
 from idmtools.entities import CommandLine
 from idmtools.entities.experiment import Experiment
 from idmtools.entities.templated_simulation import TemplatedSimulations
-from idmtools_models.python.python_task import PythonTask
+from idmtools_models.python.json_python_task import JSONConfiguredPythonTask
 from idmtools_models.python.singularity_json_python_task import SingularityJSONConfiguredPythonTask
 
 # Create platform
@@ -23,9 +23,9 @@ if platform_type == 'COMPSPlatform':
     task.common_assets.add_assets(AssetCollection.from_id_file(f"../../singularity/definitions/{sif_name}.id"))
 
 elif platform_type == 'ContainerPlatform':
-    task = PythonTask(
-        script_path="sir_model.py",
-        python_path="python"  # or path to specific python executable
+    command = CommandLine("python3 Assets/sir_model.py")
+    task = JSONConfiguredPythonTask(
+        script_path="sir_model.py"
     )
 else:
     print("TODO for Slurm and File/Process platfroms")

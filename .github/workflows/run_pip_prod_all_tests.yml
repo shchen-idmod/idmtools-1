@@ -11,7 +11,6 @@ on:
         default: "3.12"
         type: choice
         options:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -38,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Install Python dependencies
         run: |
-          pip install idm-buildtools flake8 wheel matplotlib sqlalchemy keyring --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          pip install idm-buildtools flake8 wheel matplotlib sqlalchemy keyring
       - name: download idmtools packages from production jfrog
         run: |
           pip install idmtools[full] --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple

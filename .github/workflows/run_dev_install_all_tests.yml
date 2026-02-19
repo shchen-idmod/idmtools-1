@@ -8,7 +8,7 @@ on:
       all_tests:
         description: "All tests"
         required: false
-        default: 'true'
+        default: 'false'
       container_test:
         description: "Container Platform Test Only"
         required: false
@@ -16,7 +16,7 @@ on:
       comps_test:
         description: "Comps Platform Test Only"
         required: false
-        default: 'false'
+        default: 'true'
       general_test:
         description: "General Platform Test Only"
         required: false
@@ -73,7 +73,7 @@ jobs:
           python -m pip install --upgrade pip
       - name: Install Python dependencies
         run: |
-          pip install idm-buildtools wheel pygit2 --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+          pip install idm-buildtools wheel pygit2
 
       - name: install idmtools
         run: |
@@ -84,22 +84,21 @@ jobs:
           python dev_scripts/create_auth_token_args.py --username "${{ secrets.COMPS_USER }}"
         env:
           COMPS_PASS: ${{ secrets.COMPS_PASSWORD }}
-      - name: login to docker staging
-        run: |
-          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login idm-docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
-          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
+#      - name: login to docker staging
+#        run: |
+#          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login idm-docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
+#          echo '${{ env.PYPI_STAGING_PASSWORD }}' | docker login docker-staging.packages.idmod.org --username ${{ env.PYPI_STAGING_USERNAME }} --password-stdin
       - name: run idmtools_cli tests
-        if: >
+        if: >-
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.general_test == 'true' ||
-              github.event.inputs.slurm_test == 'true' ||
-              github.event.inputs.comps_test == 'true'
+              inputs.all_tests ||
+              inputs.general_test ||
+              inputs.slurm_test ||
+              inputs.comps_test
             )
-          ) ||
-          (
+          ) || (
             github.actor == 'dependabot[bot]' ||
             github.actor == 'dependabot-preview[bot]'
           )
@@ -117,10 +116,10 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.general_test == 'true' ||
-              github.event.inputs.slurm_test == 'true' ||
-              github.event.inputs.comps_test == 'true'
+              inputs.all_tests ||
+              inputs.general_test ||
+              inputs.slurm_test ||
+              inputs.comps_test
             )
           ) ||
           (
@@ -141,10 +140,10 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.general_test == 'true' ||
-              github.event.inputs.slurm_test == 'true' ||
-              github.event.inputs.comps_test == 'true'
+              inputs.all_tests ||
+              inputs.general_test ||
+              inputs.slurm_test ||
+              inputs.comps_test 
             )
           ) ||
           (
@@ -165,8 +164,8 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.general_test == 'true'
+              inputs.all_tests ||
+              inputs.general_test 
             )
           ) ||
           (
@@ -187,8 +186,8 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.slurm_test == 'true'
+              inputs.all_tests ||
+              inputs.slurm_test 
             )
           ) ||
           (
@@ -209,8 +208,8 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.container_test == 'true'
+              inputs.all_tests ||
+              inputs.container_test
             )
           ) ||
           (
@@ -231,8 +230,8 @@ jobs:
           (
             github.event_name == 'workflow_dispatch' &&
             (
-              github.event.inputs.all_tests == 'true' ||
-              github.event.inputs.comps_test == 'true'
+              inputs.all_tests ||
+              inputs.comps_test
             )
           ) ||
           (
