@@ -8,7 +8,7 @@ on:
       all_tests:
         description: "All tests"
         required: false
-        default: 'false'
+        default: 'true'
       container_test:
         description: "Container Platform Test Only"
         required: false
@@ -16,7 +16,7 @@ on:
       comps_test:
         description: "Comps Platform Test Only"
         required: false
-        default: 'true'
+        default: 'false'
       general_test:
         description: "General Platform Test Only"
         required: false
