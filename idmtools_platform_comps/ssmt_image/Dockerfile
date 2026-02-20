@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update
@@ -11,21 +11,15 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 RUN ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-# install python3
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    python3-dev \
-    python3-venv \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+# install Python3
+RUN apt-get install -y python3-pip
+RUN apt-get install -y python3-dev
 RUN pip install --upgrade pip setuptools
 
-RUN apt-get update && apt-get install -y \
-    xz-utils \
-    llvm \
-    && rm -rf /var/lib/apt/lists/*
+# r packages to support analysis in R
+RUN apt-get install -y xz-utils llvm r-base \
+    # clean up temporary data
+    && mkdir -p /root/.pip
 
 # clean up temporary data
 RUN mkdir -p /root/.pip
@@ -45,13 +39,13 @@ RUN pip3 install -U pip && \
     pip install pygit2
 
 #idm-comps
-RUN bash -c "pip3 install /tmp/*.gz --index-url=https://pypi.org/simple"
+RUN bash -c "pip3 install /tmp/*.gz"
 
 # make the PIP index configurable so we can build against staging, production, or a local PyPI server
 ARG SSMT_VERSION
 
 # Install the packages
-RUN pip3 install --upgrade pip --index-url=https://pypi.python.org/simple && \
+RUN pip3 install --upgrade pip && \
     pip3 install dataclasses && \
     pip3 install -r /tmp/requirements.txt && \
     rm -rf /root/.cache
