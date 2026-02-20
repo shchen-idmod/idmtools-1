@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+<!-- START doctoc -->
+<!-- END doctoc -->
+
 ## Project Overview
 
 idmtools is a collection of Python tools for streamlining interactions with disease modeling workflows on HPC clusters and various compute platforms (COMPS, Slurm, Docker containers). This is a **monorepo** containing multiple related packages.

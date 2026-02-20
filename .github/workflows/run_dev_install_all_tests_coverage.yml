@@ -49,7 +49,7 @@ jobs:
         run: |
           pip install wheel pygit2
 
-      - name: install idmtools
+      - name: dev install idmtools
         run: |
           python dev_scripts/bootstrap.py
       - name: login to comps2

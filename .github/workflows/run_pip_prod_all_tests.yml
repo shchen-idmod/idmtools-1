@@ -38,7 +38,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install flake8 wheel matplotlib sqlalchemy keyring
-      - name: download idmtools packages from production jfrog
+      - name: pip install idmtools packages
         run: |
           pip install idmtools[full]
           pip install idmtools-test
