@@ -23,9 +23,17 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip setuptools
 
 # r packages to support analysis in R
-RUN apt-get install -y xz-utils llvm r-base \
-    # clean up temporary data
-    && mkdir -p /root/.pip
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    xz-utils \
+    llvm \
+    && add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu noble-cran40/" \
+    && apt-get update \
+    && apt-get install -y r-base \
+    && rm -rf /var/lib/apt/lists/*
+
+# clean up temporary data
+RUN mkdir -p /root/.pip
 
 #    && apt-get clean && \     <--- We do this at the end of this file
 #    mkdir -p /root/.pip && \
