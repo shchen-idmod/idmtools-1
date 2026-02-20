@@ -34,7 +34,7 @@ dependencies = [
     "click~=8.1.7",
     "click-plugins",
     "colorama~=0.4.6",
-    "cookiecutter~=2.6.0",
+    "cookiecutter~=2.6",
     "idmtools~=3.0",
     "pyperclip~=1.8",
     "yaspin~=3.0",

@@ -35,7 +35,7 @@ classifiers = [
 ]
 dependencies = [
     "idmtools_platform_general~=3.0",
-    "docker>5.0",
+    "docker~=7.0",
     "rich~=14.3",
 ]
 
