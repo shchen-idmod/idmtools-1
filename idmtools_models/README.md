@@ -14,7 +14,7 @@
 ## Installing
 
 ```bash
-pip install idmtools-models --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-models
 ```
 
 # Development Tips

@@ -7,7 +7,7 @@ name = "idmtools_cli"
 dynamic = ["version"]
 description = "CLI for IDM-Tools"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license-files = ["LICENSE.txt"]
 keywords = [
     "modeling",
@@ -23,22 +23,21 @@ authors = [
     { name = "Benoit Raybaud", email = "braybaud@idmod.org" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
     "click~=8.1.7",
     "click-plugins",
     "colorama~=0.4.6",
-    "cookiecutter~=2.6.0",
-    "idmtools>=0.0.0,<1.0.0",
-    "tabulate>=0.8.9,<0.10",
+    "cookiecutter~=2.6",
+    "idmtools~=3.0",
     "pyperclip~=1.8",
-    "yaspin>=1.2.0,<3.1.0",
+    "yaspin~=3.0",
 ]
 
 [project.optional-dependencies]

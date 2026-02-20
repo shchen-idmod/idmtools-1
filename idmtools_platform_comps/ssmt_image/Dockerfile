@@ -21,6 +21,9 @@ RUN apt-get install -y xz-utils llvm r-base \
     # clean up temporary data
     && mkdir -p /root/.pip
 
+# clean up temporary data
+RUN mkdir -p /root/.pip
+
 #    && apt-get clean && \     <--- We do this at the end of this file
 #    mkdir -p /root/.pip && \
 #    rm -rf /var/lib/apt/lists/*    <--- We do this at the end of this file
@@ -36,14 +39,13 @@ RUN pip3 install -U pip && \
     pip install pygit2
 
 #idm-comps
-RUN bash -c "pip3 install idm-comps --index-url=https://test.pypi.org/simple --extra-index-url=https://pypi.org/simple"
-RUN bash -c "pip3 install /tmp/*.gz --index-url=https://pypi.org/simple"
+RUN bash -c "pip3 install /tmp/*.gz"
 
 # make the PIP index configurable so we can build against staging, production, or a local PyPI server
 ARG SSMT_VERSION
 
 # Install the packages
-RUN pip3 install --upgrade pip --index-url=https://pypi.python.org/simple && \
+RUN pip3 install --upgrade pip && \
     pip3 install dataclasses && \
     pip3 install -r /tmp/requirements.txt && \
     rm -rf /root/.cache

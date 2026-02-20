@@ -15,4 +15,3 @@ try:
 except PackageNotFoundError:
     # Package not installed, use fallback
     __version__ = "0.0.0+unknown"
-

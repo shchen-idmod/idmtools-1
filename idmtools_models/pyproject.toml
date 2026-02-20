@@ -25,15 +25,15 @@ authors = [
     { name = "Jen Schripsema", email = "jschripsema@idmod.org" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "idmtools>=0.0.0,<1.0.0",
+    "idmtools~=3.0"
 ]
 
 [project.urls]
@@ -42,13 +42,12 @@ Homepage = "https://github.com/InstituteforDiseaseModeling/idmtools"
 [project.optional-dependencies]
 test = [
     "idmtools[test]",
-    "pyCOMPS~=2.11",
     "idmtools_test",
-    "matplotlib~=3.10"
+    "matplotlib~=3.10",
+    "idm-pycomps>=2.11.0"
 ]
 packaging = [
     "flake8",
-    "coverage",
     "bump2version",
     "twine",
 ]

@@ -27,7 +27,7 @@
 ## Installing
 
 ```bash
-pip install idmtools-cli --index-url=https://packages.idmod.org/api/pypi/pypi-production/simple
+pip install idmtools-cli
 ```
 
 # Development tips

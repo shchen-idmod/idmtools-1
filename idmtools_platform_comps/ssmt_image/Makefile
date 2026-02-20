@@ -31,3 +31,9 @@ docker-build-publish: ## Build and publish  image using the local pypi
 	$(MAKE) -C ../../idmtools_models dist
 	$(MAKE) -C ../../idmtools_platform_comps dist
 	python build_ssmt_image.py --production --push
+
+docker-build-publish-staging: ## Build and publish  image using the local pypi
+	$(MAKE) -C ../../idmtools_core dist
+	$(MAKE) -C ../../idmtools_models dist
+	$(MAKE) -C ../../idmtools_platform_comps dist
+	python build_ssmt_image.py --push

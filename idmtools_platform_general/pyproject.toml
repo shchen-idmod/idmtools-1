@@ -7,7 +7,7 @@ name = "idmtools_platform_general"
 dynamic = ["version"]
 description = "General platform for IDM-Tools"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license-files = ["LICENSE.txt"]
 keywords = [
     "modeling",
@@ -21,16 +21,16 @@ authors = [
     { name = "Ross Carter", email = "rcarter@idmod.org" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "idmtools>=0.0.0,<1.0.0",
-    "idmtools_cli>=0.0.0,<1.0.0",
+    "idmtools~=3.0",
+    "idmtools_cli~=3.0",
 ]
 
 [project.urls]
@@ -42,11 +42,10 @@ test = [
     "idmtools_test",
 ]
 packaging = [
-    "flake8",
-    "coverage",
+    "flake8~=7.3",
     "bump2version",
-    "twine",
-    "natsort",
+    "twine~=6.2",
+    "natsort~=8.4",
 ]
 
 [project.entry-points."idmtools_platform"]
