@@ -4,7 +4,7 @@ import os
 import glob
 import re
 import tomllib  # use 'tomli' if you're on Python <3.11
-import tomli_w  # write support; install with `pip install tomli-w`
+# import tomli_w  # write support; install with `pip install tomli-w`
 
 REPO_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 CORE_PATH = os.path.join(REPO_PATH, 'idmtools_core')
@@ -51,7 +51,7 @@ def update_requirements():
 def update_idmtools_version_in_pyproject():
     """Update idmtools and idmtools_platform_general dependency versions in pyproject.toml files."""
     # Match idmtools or idmtools_platform_general optionally with version specifier
-    #pattern_idmtools = re.compile(r'^idmtools([ \t]*(==|~=|>=|<=)?[ \t]*[\d\.]+)?$')
+    # pattern_idmtools = re.compile(r'^idmtools([ \t]*(==|~=|>=|<=)?[ \t]*[\d\.]+)?$')
     pattern_idmtools = re.compile(r'^idmtools([\t ]*(==|~=|>=|<=|>|<)[\t ]*[\d\.]+)*')
     pattern_general = re.compile(r'^idmtools_platform_general([\t ]*(==|~=|>=|<=|>|<)[\t ]*[\d\.]+)*')
     pattern_cli = re.compile(r'^idmtools_cli([\t ]*(==|~=|>=|<=|>|<)[\t ]*[\d\.]+)*')

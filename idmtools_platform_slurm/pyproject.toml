@@ -7,7 +7,7 @@ name = "idmtools_platform_slurm"
 dynamic = ["version"]
 description = "Provides ability to run against Slurm"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license-files = ["LICENSE.txt"]
 keywords = [
     "modeling",
@@ -29,8 +29,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "idmtools_platform_general>=0.0.0,<1.0.0",
-    "dataclasses-json",
+    "idmtools_platform_general~=3.0",
+    "dataclasses-json~=0.6",
 ]
 
 [project.urls]
