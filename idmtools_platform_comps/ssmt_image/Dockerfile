@@ -14,6 +14,9 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 # install Python3
 RUN apt-get install -y python3-pip
 RUN apt-get install -y python3-dev
+
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --upgrade pip setuptools
 
 # r packages to support analysis in R
