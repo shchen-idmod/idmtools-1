@@ -11,9 +11,12 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 RUN ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
-# install Python3
-RUN apt-get install -y python3-pip
-RUN apt-get install -y python3-dev
+# install python3
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    python3-dev \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
