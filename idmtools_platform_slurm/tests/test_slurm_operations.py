@@ -26,6 +26,46 @@ class TestSlurmOperations(ITestWithPersistence):
     def setUp(self) -> None:
         self.platform = Platform('SLURM_LOCAL')
 
+    def _generate_batch_from_simtools_config(self, extra_config_lines=None):
+        """Create a batch file using a temporary simtools.ini and return its contents."""
+        original_config = os.environ.get("IDMTOOLS_CONFIG_FILE")
+        IdmConfigParser.clear_instance()
+        contents = None
+        with tempfile.TemporaryDirectory() as temp_dir:
+            job_dir = os.path.join(temp_dir, "jobs")
+            os.makedirs(job_dir, exist_ok=True)
+            simtools_ini = os.path.join(temp_dir, "simtools.ini")
+            config_lines = [
+                "[SLURM_SIMTOOLS]",
+                "type = Slurm",
+                f"job_directory = {job_dir}",
+            ]
+            if extra_config_lines:
+                config_lines.extend(extra_config_lines)
+            with open(simtools_ini, "w") as config_file:
+                config_file.write("\n".join(config_lines))
+            os.environ["IDMTOOLS_CONFIG_FILE"] = simtools_ini
+            IdmConfigParser.clear_instance()
+            try:
+                platform = Platform('SLURM_SIMTOOLS')
+                slurm_op = SlurmOperations(platform=platform)
+                suite = Suite(name="Suite")
+                experiment = Experiment(name="ExpSimtools")
+                experiment.parent = suite
+                slurm_op.mk_directory(experiment)
+                slurm_op.create_batch_file(experiment)
+                batch_path = os.path.join(platform.get_directory(experiment), "batch.sh")
+                self.assertTrue(os.path.exists(batch_path))
+                with open(batch_path, 'r') as batch_file:
+                    contents = batch_file.read()
+            finally:
+                IdmConfigParser.clear_instance()
+                if original_config is None:
+                    os.environ.pop("IDMTOOLS_CONFIG_FILE", None)
+                else:
+                    os.environ["IDMTOOLS_CONFIG_FILE"] = original_config
+        return contents
+
     # Test platform slurm_fields property
     def test_slurm_platform_fields(self):
         actual_field_set = self.platform.slurm_fields
@@ -194,6 +234,24 @@ class TestSlurmOperations(ITestWithPersistence):
         # clean up suite folder
         shutil.rmtree(exp_dir)
         self.assertFalse(os.path.exists(job_path))
+
+    def test_simtools_ini_propogate_slurm_env_var_updates_batch_script(self):
+        contents = self._generate_batch_from_simtools_config([
+            "propogate_slurm_env_var = False"
+        ])
+        self.assertIn("unset SLURM_JOB_ID", contents)
+        self.assertIn("unset SLURM_MEM_PER_NODE", contents)
+
+    def test_simtools_ini_propogate_true_or_default_keeps_slurm_env_vars(self):
+        scenarios = {
+            "explicit_true": ["propogate_slurm_env_var = True"],
+            "unspecified": None,
+        }
+        for name, extra_lines in scenarios.items():
+            with self.subTest(case=name):
+                contents = self._generate_batch_from_simtools_config(extra_lines)
+                self.assertNotIn("unset SLURM_JOB_ID", contents)
+                self.assertNotIn("unset SLURM_MEM_PER_NODE", contents)
 
     # Test SlurmOperations create_batch_file for simulation
     def test_SlurmOperations_create_batch_file_simulation(self):
